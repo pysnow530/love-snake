@@ -13,8 +13,8 @@
 (fn Snake.draw [self rect]
     (each [_ [x y] (ipairs self.nodes)]
           (rect :fill
-                                   (* x NODE-LENGTH) (* y NODE-LENGTH)
-                                   NODE-LENGTH NODE-LENGTH)))
+                (* x NODE-LENGTH) (* y NODE-LENGTH)
+                NODE-LENGTH NODE-LENGTH)))
 
 (local snake (Snake:new [1 0] [[0 (/ HEIGHT 2)]] 2))
 
