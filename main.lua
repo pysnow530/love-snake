@@ -1,7 +1,7 @@
 __fnl_global__NODE_2dLENGTH = 15
 WIDTH = 20
 HEIGHT = 10
-STATE = nil
+STATE = "Playing"
 local Snake = {}
 Snake.new = function(cls, dir, body, speed)
   local obj = setmetatable({dir = dir, body = body, speed = speed}, {__index = cls})
@@ -148,7 +148,11 @@ local function predicate_type(_14_)
   end
 end
 local total_dt = 0
-love.keypressed = function(key, scancode, isrepeat)
+love.load = function()
+  local font = love.graphics.newFont(32)
+  return love.graphics.setFont(font)
+end
+love.keypressed = function(key, _, _0)
   if (key == "j") then
     return snake["turn-left"](snake)
   elseif (key == "k") then
@@ -174,35 +178,55 @@ love.update = function(dt)
     local dir_y = _let_26_[2]
     local new_x = (head_x + dir_x)
     local new_y = (head_y + dir_y)
-    local type = predicate_type({new_x, new_y})
-    if (type == "wall") then
+    local next_pos_type = predicate_type({new_x, new_y})
+    if (next_pos_type == "wall") then
       STATE = "GameOver"
-    elseif (type == "body") then
+      return nil
+    elseif (next_pos_type == "body") then
       STATE = "GameOver"
-    elseif (type == "apple") then
+      return nil
+    elseif (next_pos_type == "apple") then
       snake:eat()
-      table.remove(apples)
-    elseif (type == nil) then
-      snake:move()
+      return table.remove(apples)
+    elseif (next_pos_type == nil) then
+      return snake:move()
     else
+      return nil
     end
-  else
-  end
-  if (STATE == "GameOver") then
-    return love.graphics.print("Game Over", 100, 100)
   else
     return nil
   end
 end
-love.draw = function()
+local function show_game_over()
+  local text = "Game Over!"
+  local font = love.graphics.getFont()
+  local fontWidth = font:getWidth(text)
+  local fontHeight = font:getHeight()
+  local winWidth, winHeight = love.graphics.getDimensions()
+  return love.graphics.print("Game Over!", ((winWidth / 2) - (fontWidth / 2)), ((winHeight / 2) - (fontHeight / 2)))
+end
+local function draw_apples()
   love.graphics.setColor(0.8, 0.2, 0.2)
-  for _, _30_ in ipairs(apples) do
-    local _each_31_ = _30_["pos"]
-    local x = _each_31_[1]
-    local y = _each_31_[2]
+  for _, _29_ in ipairs(apples) do
+    local _each_30_ = _29_["pos"]
+    local x = _each_30_[1]
+    local y = _each_30_[2]
     love.graphics.rectangle("fill", (x * __fnl_global__NODE_2dLENGTH), (y * __fnl_global__NODE_2dLENGTH), __fnl_global__NODE_2dLENGTH, __fnl_global__NODE_2dLENGTH)
   end
+  return nil
+end
+local function draw_snake()
   love.graphics.setColor(0.2, 0.8, 0.2)
   return snake:draw(love.graphics.rectangle)
+end
+love.draw = function()
+  if (STATE == "Playing") then
+    draw_apples()
+    return draw_snake()
+  elseif (STATE == "GameOver") then
+    return show_game_over()
+  else
+    return nil
+  end
 end
 return love.draw

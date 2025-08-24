@@ -2,7 +2,7 @@
 (global WIDTH 20)
 (global HEIGHT 10)
 
-(global STATE nil)
+(global STATE :Playing)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; snake ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (local Snake {})
@@ -78,10 +78,15 @@
 
 (var total-dt 0)
 
-(fn love.keypressed [key scancode isrepeat]
-    (match key
-           :j (snake:turn-left)
-           :k (snake:turn-right)))
+(fn love.load []
+    ;; init font
+    (let [font (love.graphics.newFont 32)]
+      (love.graphics.setFont font)))
+
+(fn love.keypressed [key _ _]
+    (case key
+      :j (snake:turn-left)
+      :k (snake:turn-right)))
 
 (fn love.update [dt]
     (set total-dt (+ total-dt dt))
@@ -92,20 +97,38 @@
         (let [{:body [[head-x head-y]] :dir [dir-x dir-y]} snake
               new-x (+ head-x dir-x)
               new-y (+ head-y dir-y)
-              type (predicate-type [new-x new-y])]
-          (match type
-                 :wall (set STATE :GameOver)
-                 :body (set STATE :GameOver)
-                 :apple (do (snake:eat) (table.remove apples))
-                 nil (snake:move)))))
-    (if (= STATE :GameOver)
-      (love.graphics.print "Game Over" 100 100)))
+              next-pos-type (predicate-type [new-x new-y])]
+          (case next-pos-type
+            :wall (set STATE :GameOver)
+            :body (set STATE :GameOver)
+            :apple (do (snake:eat) (table.remove apples))
+            nil (snake:move))))))
 
-(fn love.draw []
+(fn show-game-over []
+    (let [text "Game Over!"
+          font (love.graphics.getFont)
+          fontWidth (font:getWidth text)
+          fontHeight (font:getHeight)
+          (winWidth winHeight) (love.graphics.getDimensions)]
+      (love.graphics.print "Game Over!"
+                           (- (/ winWidth 2) (/ fontWidth 2))
+                           (- (/ winHeight 2) (/ fontHeight 2)))))
+
+
+(fn draw-apples []
     (love.graphics.setColor 0.8 0.2 0.2)
     (each [_ {:pos [x y]} (ipairs apples)]
           (love.graphics.rectangle :fill
                                    (* x NODE-LENGTH) (* y NODE-LENGTH)
-                                   NODE-LENGTH NODE-LENGTH))
+                                   NODE-LENGTH NODE-LENGTH)))
+
+(fn draw-snake []
     (love.graphics.setColor 0.2 0.8 0.2)
     (snake:draw love.graphics.rectangle))
+
+(fn love.draw []
+    (case STATE
+      :Playing (do
+                 (draw-apples)
+                 (draw-snake))
+      :GameOver (show-game-over)))
