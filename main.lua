@@ -95,12 +95,14 @@ love.update = function(dt)
   return snake:move(dt)
 end
 love.draw = function()
+  love.graphics.setColor(0.8, 0.2, 0.2)
   for _, _10_ in ipairs(apples) do
     local _each_11_ = _10_["pos"]
     local x = _each_11_[1]
     local y = _each_11_[2]
     love.graphics.rectangle("fill", (x * __fnl_global__NODE_2dLENGTH), (y * __fnl_global__NODE_2dLENGTH), __fnl_global__NODE_2dLENGTH, __fnl_global__NODE_2dLENGTH)
   end
+  love.graphics.setColor(0.2, 0.8, 0.2)
   return snake:draw(love.graphics.rectangle)
 end
 return love.draw

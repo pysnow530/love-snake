@@ -62,8 +62,10 @@
     (snake:move dt))
 
 (fn love.draw []
+    (love.graphics.setColor 0.8 0.2 0.2)
     (each [_ {:pos [x y]} (ipairs apples)]
           (love.graphics.rectangle :fill
                                    (* x NODE-LENGTH) (* y NODE-LENGTH)
                                    NODE-LENGTH NODE-LENGTH))
+    (love.graphics.setColor 0.2 0.8 0.2)
     (snake:draw love.graphics.rectangle))
