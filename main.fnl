@@ -10,6 +10,20 @@
                  {:__index cls}))
     obj)
 
+(fn Snake.move [self delta]
+    (set self.nodes
+         (icollect [_ [x y] (ipairs self.nodes)]
+                   [(+ x (* (. self.dir 1) self.speed delta))
+                    (+ y (* (. self.dir 2) self.speed delta))])))
+
+(fn Snake.turn-left [self]
+    (let [[x y] self.dir]
+      (set self.dir [y (- x)])))
+
+(fn Snake.turn-right [self]
+    (let [[x y] self.dir]
+      (set self.dir [(- y) x])))
+
 (fn Snake.draw [self rect]
     (each [_ [x y] (ipairs self.nodes)]
           (rect :fill
@@ -18,11 +32,13 @@
 
 (local snake (Snake:new [1 0] [[0 (/ HEIGHT 2)]] 2))
 
+(fn love.keypressed [key scancode isrepeat]
+    (match key
+           :j (snake:turn-left)
+           :k (snake:turn-right)))
+
 (fn love.update [delta]
-    (set snake.nodes
-         (icollect [_ [x y] (ipairs snake.nodes)]
-                     [(+ x (* (. snake.dir 1) snake.speed delta))
-                      (+ y (* (. snake.dir 2) snake.speed delta))])))
+    (snake:move delta))
 
 (fn love.draw []
     (snake:draw love.graphics.rectangle))
