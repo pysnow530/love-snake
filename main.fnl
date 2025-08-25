@@ -4,6 +4,9 @@
 
 (global STATE :Welcome)
 
+;; audio
+(global move-sound nil)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; snake ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (local Snake {})
 
@@ -19,12 +22,13 @@
           new-y (+ head-y dir-y)]
       (table.insert self.body 1 [new-x new-y])))
 
-(fn Snake.move [self]
+(fn Snake.move [self sound]
     (let [{:body [[head-x head-y]] :dir [dir-x dir-y]} self
           new-x (+ head-x dir-x)
           new-y (+ head-y dir-y)]
       (table.insert self.body 1 [new-x new-y])
-      (table.remove self.body)))
+      (table.remove self.body)
+      (love.audio.play sound)))
 
 (fn Snake.turn-left [self]
     (let [[x y] self.dir]
@@ -89,7 +93,9 @@
 (fn love.load []
     ;; init font
     (let [font (love.graphics.newFont 32)]
-      (love.graphics.setFont font)))
+      (love.graphics.setFont font))
+    ;; init audio
+    (set move-sound (love.audio.newSource "audio/move.wav" :static)))
 
 (fn love.keypressed [key _ _]
     (case STATE
@@ -113,7 +119,7 @@
               :wall (set STATE :GameOver)
               :body (set STATE :GameOver)
               :apple (do (snake:eat) (table.remove apples))
-              nil (snake:move)))))))
+              nil (snake:move move-sound)))))))
 
 (fn show-welcome []
     (love.graphics.print "Welcome to snake, powered by love2d!" 100 100)
