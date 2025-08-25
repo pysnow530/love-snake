@@ -44,11 +44,14 @@ Snake["turn-right"] = function(self)
   self.dir = {( - y), x}
   return nil
 end
-Snake.draw = function(self, rect)
+local function draw_box(x, y)
+  return love.graphics.rectangle("fill", (x * __fnl_global__NODE_2dLENGTH), (y * __fnl_global__NODE_2dLENGTH), __fnl_global__NODE_2dLENGTH, __fnl_global__NODE_2dLENGTH, (__fnl_global__NODE_2dLENGTH * 0.3), (__fnl_global__NODE_2dLENGTH * 0.3))
+end
+Snake.draw = function(self)
   for _, _7_ in ipairs(self.body) do
     local x = _7_[1]
     local y = _7_[2]
-    rect("fill", (x * __fnl_global__NODE_2dLENGTH), (y * __fnl_global__NODE_2dLENGTH), __fnl_global__NODE_2dLENGTH, __fnl_global__NODE_2dLENGTH)
+    draw_box(x, y)
   end
   return nil
 end
@@ -179,7 +182,6 @@ love.update = function(dt)
     else
     end
     total_dt = (total_dt + dt)
-    print(total_dt)
     if (total_dt > snake.speed) then
       total_dt = (total_dt - snake.speed)
       local _let_26_ = snake["body"]
@@ -231,13 +233,13 @@ local function draw_apples()
     local _each_33_ = _32_["pos"]
     local x = _each_33_[1]
     local y = _each_33_[2]
-    love.graphics.rectangle("fill", (x * __fnl_global__NODE_2dLENGTH), (y * __fnl_global__NODE_2dLENGTH), __fnl_global__NODE_2dLENGTH, __fnl_global__NODE_2dLENGTH)
+    draw_box(x, y)
   end
   return nil
 end
 local function draw_snake()
   love.graphics.setColor(0.2, 0.8, 0.2)
-  return snake:draw(love.graphics.rectangle)
+  return snake:draw()
 end
 love.draw = function()
   if (STATE == "Welcome") then

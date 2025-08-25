@@ -34,11 +34,19 @@
     (let [[x y] self.dir]
       (set self.dir [(- y) x])))
 
-(fn Snake.draw [self rect]
+(fn draw-box [x y]
+    (love.graphics.rectangle
+      :fill
+      (* x NODE-LENGTH) 
+      (* y NODE-LENGTH)
+      NODE-LENGTH
+      NODE-LENGTH
+      (* NODE-LENGTH 0.3)
+      (* NODE-LENGTH 0.3)))
+
+(fn Snake.draw [self]
     (each [_ [x y] (ipairs self.body)]
-          (rect :fill
-                (* x NODE-LENGTH) (* y NODE-LENGTH)
-                NODE-LENGTH NODE-LENGTH)))
+          (draw-box x y)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; /snake ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; apple ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -94,7 +102,6 @@
     (when (= STATE :Playing)
       (if (= 0 (length apples)) (table.insert apples (Apple:new snake.body)))
       (set total-dt (+ total-dt dt))
-      (print total-dt)
       (if (> total-dt snake.speed)
         (do
           (set total-dt (- total-dt snake.speed))
@@ -125,13 +132,11 @@
 (fn draw-apples []
     (love.graphics.setColor 0.8 0.2 0.2)
     (each [_ {:pos [x y]} (ipairs apples)]
-          (love.graphics.rectangle :fill
-                                   (* x NODE-LENGTH) (* y NODE-LENGTH)
-                                   NODE-LENGTH NODE-LENGTH)))
+          (draw-box x y)))
 
 (fn draw-snake []
     (love.graphics.setColor 0.2 0.8 0.2)
-    (snake:draw love.graphics.rectangle))
+    (snake:draw))
 
 (fn love.draw []
     (case STATE
