@@ -173,34 +173,39 @@ love.keypressed = function(key, _, _0)
   end
 end
 love.update = function(dt)
-  total_dt = (total_dt + dt)
-  if (0 == #apples) then
-    table.insert(apples, Apple:new(snake.body))
-  else
-  end
-  if (total_dt > snake.speed) then
-    total_dt = (total_dt - snake.speed)
-    local _let_26_ = snake["body"]
-    local _let_27_ = _let_26_[1]
-    local head_x = _let_27_[1]
-    local head_y = _let_27_[2]
-    local _let_28_ = snake["dir"]
-    local dir_x = _let_28_[1]
-    local dir_y = _let_28_[2]
-    local new_x = (head_x + dir_x)
-    local new_y = (head_y + dir_y)
-    local next_pos_type = predicate_type({new_x, new_y})
-    if (next_pos_type == "wall") then
-      STATE = "GameOver"
-      return nil
-    elseif (next_pos_type == "body") then
-      STATE = "GameOver"
-      return nil
-    elseif (next_pos_type == "apple") then
-      snake:eat()
-      return table.remove(apples)
-    elseif (next_pos_type == nil) then
-      return snake:move()
+  if (STATE == "Playing") then
+    if (0 == #apples) then
+      table.insert(apples, Apple:new(snake.body))
+    else
+    end
+    total_dt = (total_dt + dt)
+    print(total_dt)
+    if (total_dt > snake.speed) then
+      total_dt = (total_dt - snake.speed)
+      local _let_26_ = snake["body"]
+      local _let_27_ = _let_26_[1]
+      local head_x = _let_27_[1]
+      local head_y = _let_27_[2]
+      local _let_28_ = snake["dir"]
+      local dir_x = _let_28_[1]
+      local dir_y = _let_28_[2]
+      local new_x = (head_x + dir_x)
+      local new_y = (head_y + dir_y)
+      local next_pos_type = predicate_type({new_x, new_y})
+      if (next_pos_type == "wall") then
+        STATE = "GameOver"
+        return nil
+      elseif (next_pos_type == "body") then
+        STATE = "GameOver"
+        return nil
+      elseif (next_pos_type == "apple") then
+        snake:eat()
+        return table.remove(apples)
+      elseif (next_pos_type == nil) then
+        return snake:move()
+      else
+        return nil
+      end
     else
       return nil
     end
@@ -222,10 +227,10 @@ local function show_game_over()
 end
 local function draw_apples()
   love.graphics.setColor(0.8, 0.2, 0.2)
-  for _, _31_ in ipairs(apples) do
-    local _each_32_ = _31_["pos"]
-    local x = _each_32_[1]
-    local y = _each_32_[2]
+  for _, _32_ in ipairs(apples) do
+    local _each_33_ = _32_["pos"]
+    local x = _each_33_[1]
+    local y = _each_33_[2]
     love.graphics.rectangle("fill", (x * __fnl_global__NODE_2dLENGTH), (y * __fnl_global__NODE_2dLENGTH), __fnl_global__NODE_2dLENGTH, __fnl_global__NODE_2dLENGTH)
   end
   return nil

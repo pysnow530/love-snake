@@ -91,20 +91,22 @@
                  :k (snake:turn-right))))
 
 (fn love.update [dt]
-    (set total-dt (+ total-dt dt))
-    (if (= 0 (length apples)) (table.insert apples (Apple:new snake.body)))
-    (if (> total-dt snake.speed)
-      (do
-        (set total-dt (- total-dt snake.speed))
-        (let [{:body [[head-x head-y]] :dir [dir-x dir-y]} snake
-              new-x (+ head-x dir-x)
-              new-y (+ head-y dir-y)
-              next-pos-type (predicate-type [new-x new-y])]
-          (case next-pos-type
-            :wall (set STATE :GameOver)
-            :body (set STATE :GameOver)
-            :apple (do (snake:eat) (table.remove apples))
-            nil (snake:move))))))
+    (when (= STATE :Playing)
+      (if (= 0 (length apples)) (table.insert apples (Apple:new snake.body)))
+      (set total-dt (+ total-dt dt))
+      (print total-dt)
+      (if (> total-dt snake.speed)
+        (do
+          (set total-dt (- total-dt snake.speed))
+          (let [{:body [[head-x head-y]] :dir [dir-x dir-y]} snake
+                new-x (+ head-x dir-x)
+                new-y (+ head-y dir-y)
+                next-pos-type (predicate-type [new-x new-y])]
+            (case next-pos-type
+              :wall (set STATE :GameOver)
+              :body (set STATE :GameOver)
+              :apple (do (snake:eat) (table.remove apples))
+              nil (snake:move)))))))
 
 (fn show-welcome []
     (love.graphics.print "Welcome to snake, powered by love2d!" 100 100)
