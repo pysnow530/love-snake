@@ -2,7 +2,7 @@
 (global WIDTH 20)
 (global HEIGHT 10)
 
-(global STATE :Playing)
+(global STATE :Welcome)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; snake ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (local Snake {})
@@ -84,9 +84,11 @@
       (love.graphics.setFont font)))
 
 (fn love.keypressed [key _ _]
-    (case key
-      :j (snake:turn-left)
-      :k (snake:turn-right)))
+    (case STATE
+      :Welcome (if (= key :j) (set STATE :Playing))
+      :Playing (case key
+                 :j (snake:turn-left)
+                 :k (snake:turn-right))))
 
 (fn love.update [dt]
     (set total-dt (+ total-dt dt))
@@ -104,6 +106,10 @@
             :apple (do (snake:eat) (table.remove apples))
             nil (snake:move))))))
 
+(fn show-welcome []
+    (love.graphics.print "Welcome to snake, powered by love2d!" 100 100)
+    (love.graphics.print "Press j to start game :-p" 100 200))
+
 (fn show-game-over []
     (let [text "Game Over!"
           font (love.graphics.getFont)
@@ -113,7 +119,6 @@
       (love.graphics.print "Game Over!"
                            (- (/ winWidth 2) (/ fontWidth 2))
                            (- (/ winHeight 2) (/ fontHeight 2)))))
-
 
 (fn draw-apples []
     (love.graphics.setColor 0.8 0.2 0.2)
@@ -128,6 +133,7 @@
 
 (fn love.draw []
     (case STATE
+      :Welcome (show-welcome)
       :Playing (do
                  (draw-apples)
                  (draw-snake))
