@@ -1,6 +1,6 @@
-(global NODE-LENGTH 15)
+(global NODE-LENGTH 20)
 (global WIDTH 20)
-(global HEIGHT 10)
+(global HEIGHT 20)
 
 (global STATE :Welcome)
 
@@ -159,10 +159,17 @@
     (love.graphics.setColor 0.2 0.8 0.2)
     (snake:draw))
 
+(fn draw-grid []
+    (love.graphics.setColor 0.4 0.4 0.4)
+    (for [x 0 WIDTH]
+         (for [y 0 HEIGHT]
+              (love.graphics.points (* x NODE-LENGTH) (* y NODE-LENGTH)))))
+
 (fn love.draw []
     (case STATE
       :Welcome (show-welcome)
       :Playing (do
+                 (draw-grid)
                  (draw-apples)
                  (draw-snake))
       :GameOver (show-game-over)))

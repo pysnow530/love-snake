@@ -1,6 +1,6 @@
-__fnl_global__NODE_2dLENGTH = 15
+__fnl_global__NODE_2dLENGTH = 20
 WIDTH = 20
-HEIGHT = 10
+HEIGHT = 20
 STATE = "Welcome"
 __fnl_global__move_2dsound = nil
 __fnl_global__eat_2dsound = nil
@@ -274,10 +274,20 @@ local function draw_snake()
   love.graphics.setColor(0.2, 0.8, 0.2)
   return snake:draw()
 end
+local function draw_grid()
+  love.graphics.setColor(0.4, 0.4, 0.4)
+  for x = 0, WIDTH do
+    for y = 0, HEIGHT do
+      love.graphics.points((x * __fnl_global__NODE_2dLENGTH), (y * __fnl_global__NODE_2dLENGTH))
+    end
+  end
+  return nil
+end
 love.draw = function()
   if (STATE == "Welcome") then
     return show_welcome()
   elseif (STATE == "Playing") then
+    draw_grid()
     draw_apples()
     return draw_snake()
   elseif (STATE == "GameOver") then
