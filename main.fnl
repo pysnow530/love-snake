@@ -6,6 +6,7 @@
 
 ;; audio
 (global move-sound nil)
+(global eat-sound nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; snake ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (local Snake {})
@@ -16,11 +17,12 @@
                  {:__index cls}))
     obj)
 
-(fn Snake.eat [self]
+(fn Snake.eat [self sound]
     (let [{:body [[head-x head-y]] :dir [dir-x dir-y]} self
           new-x (+ head-x dir-x)
           new-y (+ head-y dir-y)]
-      (table.insert self.body 1 [new-x new-y])))
+      (table.insert self.body 1 [new-x new-y])
+      (love.audio.play sound)))
 
 (fn Snake.move [self sound]
     (let [{:body [[head-x head-y]] :dir [dir-x dir-y]} self
@@ -95,7 +97,8 @@
     (let [font (love.graphics.newFont 32)]
       (love.graphics.setFont font))
     ;; init audio
-    (set move-sound (love.audio.newSource "audio/move.wav" :static)))
+    (set move-sound (love.audio.newSource "audio/move.wav" :static))
+    (set eat-sound (love.audio.newSource "audio/eat.wav" :static)))
 
 (fn love.keypressed [key _ _]
     (case STATE
@@ -118,7 +121,7 @@
             (case next-pos-type
               :wall (set STATE :GameOver)
               :body (set STATE :GameOver)
-              :apple (do (snake:eat) (table.remove apples))
+              :apple (do (snake:eat eat-sound) (table.remove apples))
               nil (snake:move move-sound)))))))
 
 (fn show-welcome []

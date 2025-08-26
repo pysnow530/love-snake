@@ -3,12 +3,13 @@ WIDTH = 20
 HEIGHT = 10
 STATE = "Welcome"
 __fnl_global__move_2dsound = nil
+__fnl_global__eat_2dsound = nil
 local Snake = {}
 Snake.new = function(cls, dir, body, speed)
   local obj = setmetatable({dir = dir, body = body, speed = speed}, {__index = cls})
   return obj
 end
-Snake.eat = function(self)
+Snake.eat = function(self, sound)
   local _let_1_ = self["body"]
   local _let_2_ = _let_1_[1]
   local head_x = _let_2_[1]
@@ -18,7 +19,8 @@ Snake.eat = function(self)
   local dir_y = _let_3_[2]
   local new_x = (head_x + dir_x)
   local new_y = (head_y + dir_y)
-  return table.insert(self.body, 1, {new_x, new_y})
+  table.insert(self.body, 1, {new_x, new_y})
+  return love.audio.play(sound)
 end
 Snake.move = function(self, sound)
   local _let_4_ = self["body"]
@@ -159,6 +161,7 @@ love.load = function()
     love.graphics.setFont(font)
   end
   __fnl_global__move_2dsound = love.audio.newSource("audio/move.wav", "static")
+  __fnl_global__eat_2dsound = love.audio.newSource("audio/eat.wav", "static")
   return nil
 end
 love.keypressed = function(key, _, _0)
@@ -207,7 +210,7 @@ love.update = function(dt)
         STATE = "GameOver"
         return nil
       elseif (next_pos_type == "apple") then
-        snake:eat()
+        snake:eat(__fnl_global__eat_2dsound)
         return table.remove(apples)
       elseif (next_pos_type == nil) then
         return snake:move(__fnl_global__move_2dsound)
