@@ -13,11 +13,12 @@
 
 (fn Snake.new [cls dir body speed]
     (local obj (setmetatable
-                 {: dir : body : speed}
+                 {: dir : body : speed :new-dir dir}
                  {:__index cls}))
     obj)
 
 (fn Snake.eat [self sound]
+    (set self.dir self.new-dir)
     (let [{:body [[head-x head-y]] :dir [dir-x dir-y]} self
           new-x (+ head-x dir-x)
           new-y (+ head-y dir-y)]
@@ -25,6 +26,8 @@
       (love.audio.play sound)))
 
 (fn Snake.move [self sound]
+    ;; apply new dir
+    (set self.dir self.new-dir)
     (let [{:body [[head-x head-y]] :dir [dir-x dir-y]} self
           new-x (+ head-x dir-x)
           new-y (+ head-y dir-y)]
@@ -34,11 +37,11 @@
 
 (fn Snake.turn-left [self]
     (let [[x y] self.dir]
-      (set self.dir [y (- x)])))
+      (set self.new-dir [y (- x)])))
 
 (fn Snake.turn-right [self]
     (let [[x y] self.dir]
-      (set self.dir [(- y) x])))
+      (set self.new-dir [(- y) x])))
 
 (fn draw-box [x y]
     (love.graphics.rectangle
@@ -107,6 +110,13 @@
                  :j (snake:turn-left)
                  :k (snake:turn-right))))
 
+(fn print2 [x]
+    (print (.. "["
+               (table.concat (icollect [_ [ix iy] (ipairs x)]
+                                       (.. "[" ix " " iy "]"))
+                             " ")
+               "]")))
+
 (fn love.update [dt]
     (when (= STATE :Playing)
       (if (= 0 (length apples)) (table.insert apples (Apple:new snake.body)))
@@ -114,9 +124,11 @@
       (if (> total-dt snake.speed)
         (do
           (set total-dt (- total-dt snake.speed))
-          (let [{:body [[head-x head-y]] :dir [dir-x dir-y]} snake
-                new-x (+ head-x dir-x)
-                new-y (+ head-y dir-y)
+          (let [{:body [[head-x head-y]]
+                 :dir [dir-x dir-y]
+                 :new-dir [new-dir-x new-dir-y]} snake
+                new-x (+ head-x new-dir-x )
+                new-y (+ head-y new-dir-y)
                 next-pos-type (predicate-type [new-x new-y])]
             (case next-pos-type
               :wall (set STATE :GameOver)

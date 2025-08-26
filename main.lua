@@ -6,10 +6,11 @@ __fnl_global__move_2dsound = nil
 __fnl_global__eat_2dsound = nil
 local Snake = {}
 Snake.new = function(cls, dir, body, speed)
-  local obj = setmetatable({dir = dir, body = body, speed = speed}, {__index = cls})
+  local obj = setmetatable({dir = dir, body = body, speed = speed, ["new-dir"] = dir}, {__index = cls})
   return obj
 end
 Snake.eat = function(self, sound)
+  self.dir = self["new-dir"]
   local _let_1_ = self["body"]
   local _let_2_ = _let_1_[1]
   local head_x = _let_2_[1]
@@ -23,6 +24,7 @@ Snake.eat = function(self, sound)
   return love.audio.play(sound)
 end
 Snake.move = function(self, sound)
+  self.dir = self["new-dir"]
   local _let_4_ = self["body"]
   local _let_5_ = _let_4_[1]
   local head_x = _let_5_[1]
@@ -39,13 +41,13 @@ end
 Snake["turn-left"] = function(self)
   local x = self.dir[1]
   local y = self.dir[2]
-  self.dir = {y, ( - x)}
+  self["new-dir"] = {y, ( - x)}
   return nil
 end
 Snake["turn-right"] = function(self)
   local x = self.dir[1]
   local y = self.dir[2]
-  self.dir = {( - y), x}
+  self["new-dir"] = {( - y), x}
   return nil
 end
 local function draw_box(x, y)
@@ -184,6 +186,25 @@ love.keypressed = function(key, _, _0)
     return nil
   end
 end
+local function print2(x)
+  local _25_
+  do
+    local tbl_21_ = {}
+    local i_22_ = 0
+    for _, _26_ in ipairs(x) do
+      local ix = _26_[1]
+      local iy = _26_[2]
+      local val_23_ = ("[" .. ix .. " " .. iy .. "]")
+      if (nil ~= val_23_) then
+        i_22_ = (i_22_ + 1)
+        tbl_21_[i_22_] = val_23_
+      else
+      end
+    end
+    _25_ = tbl_21_
+  end
+  return print(("[" .. table.concat(_25_, " ") .. "]"))
+end
 love.update = function(dt)
   if (STATE == "Playing") then
     if (0 == #apples) then
@@ -193,15 +214,18 @@ love.update = function(dt)
     total_dt = (total_dt + dt)
     if (total_dt > snake.speed) then
       total_dt = (total_dt - snake.speed)
-      local _let_26_ = snake["body"]
-      local _let_27_ = _let_26_[1]
-      local head_x = _let_27_[1]
-      local head_y = _let_27_[2]
-      local _let_28_ = snake["dir"]
-      local dir_x = _let_28_[1]
-      local dir_y = _let_28_[2]
-      local new_x = (head_x + dir_x)
-      local new_y = (head_y + dir_y)
+      local _let_29_ = snake["body"]
+      local _let_30_ = _let_29_[1]
+      local head_x = _let_30_[1]
+      local head_y = _let_30_[2]
+      local _let_31_ = snake["dir"]
+      local dir_x = _let_31_[1]
+      local dir_y = _let_31_[2]
+      local _let_32_ = snake["new-dir"]
+      local new_dir_x = _let_32_[1]
+      local new_dir_y = _let_32_[2]
+      local new_x = (head_x + new_dir_x)
+      local new_y = (head_y + new_dir_y)
       local next_pos_type = predicate_type({new_x, new_y})
       if (next_pos_type == "wall") then
         STATE = "GameOver"
@@ -238,10 +262,10 @@ local function show_game_over()
 end
 local function draw_apples()
   love.graphics.setColor(0.8, 0.2, 0.2)
-  for _, _32_ in ipairs(apples) do
-    local _each_33_ = _32_["pos"]
-    local x = _each_33_[1]
-    local y = _each_33_[2]
+  for _, _36_ in ipairs(apples) do
+    local _each_37_ = _36_["pos"]
+    local x = _each_37_[1]
+    local y = _each_37_[2]
     draw_box(x, y)
   end
   return nil
