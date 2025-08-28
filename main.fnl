@@ -1,12 +1,27 @@
 (global NODE-LENGTH 20)
-(global WIDTH 20)
-(global HEIGHT 20)
+(global CORNER-LENGTH CORNER-LENGTH)
 
+;; global state
 (global STATE :Welcome)
 
 ;; audio
 (global move-sound nil)
 (global eat-sound nil)
+
+;; ui
+(global margin-left 1)
+(global margin-top 1)
+(global margin-right 1)
+(global margin-bottom 1)
+(global play-width 20)
+(global play-height 20)
+(global board-width 10)
+(global board-height 20)
+
+(fn _ [...] (* NODE-LENGTH
+               (accumulate [total 0
+                            _ x (ipairs [...])]
+                           (+ total x))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; snake ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (local Snake {})
@@ -46,8 +61,8 @@
 (fn draw-box [x y]
     (love.graphics.rectangle
       :fill
-      (* x NODE-LENGTH) 
-      (* y NODE-LENGTH)
+      (+ (* x NODE-LENGTH) (_ margin-left))
+      (+ (* y NODE-LENGTH) (_ margin-top))
       NODE-LENGTH
       NODE-LENGTH
       (* NODE-LENGTH 0.3)
@@ -62,19 +77,19 @@
 (local Apple {})
 
 (fn Apple.new [cls snake-body]
-    (var x (math.random 0 (- WIDTH 1)))
-    (var y (math.random 0 (- HEIGHT 1)))
+    (var x (math.random 0 (- play-width 1)))
+    (var y (math.random 0 (- play-height 1)))
     (while (>
             (length (icollect [_ [ix iy] (ipairs snake-body)]
                               (if (and (= ix x) (= iy y))
                                 1)))
             0)
-           (set x (math.random 0 (- WIDTH 1)))
-           (set y (math.random 0 (- HEIGHT 1))))
+           (set x (math.random 0 (- play-width 1)))
+           (set y (math.random 0 (- play-height 1))))
     (setmetatable {:pos [x y]} {:__index cls}))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; /apple ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(local snake (Snake:new [1 0] [[0 (/ HEIGHT 2)]] 0.5))
+(local snake (Snake:new [1 0] [[0 (/ play-height 2)]] 0.5))
 (local apples [])
 
 (fn all-but-last [x]
@@ -86,9 +101,9 @@
     (let [[{:pos [apple-x apple-y]}] apples
           body (all-but-last snake.body)]
       (if (or (< x 0)
-              (>= x WIDTH)
+              (>= x play-width)
               (< y 0)
-              (>= y HEIGHT)) :wall
+              (>= y play-height)) :wall
         (> (length (icollect [_ [ix iy] (ipairs body)] (if (and (= ix x) (= iy y)) 1))) 0) :body
         (and (= x apple-x) (= y apple-y)) :apple
         :else nil)))
@@ -96,8 +111,11 @@
 (var total-dt 0)
 
 (fn love.load []
+    ;; window size
+    (love.window.setMode (_ margin-left play-width 1 board-width 1)
+                         (_ margin-top play-height margin-bottom))
     ;; init font
-    (let [font (love.graphics.newFont 32)]
+    (let [font (love.graphics.newFont 16)]
       (love.graphics.setFont font))
     ;; init audio
     (set move-sound (love.audio.newSource "audio/move.wav" :static))
@@ -110,13 +128,6 @@
                  :j (snake:turn-left)
                  :k (snake:turn-right))))
 
-(fn print2 [x]
-    (print (.. "["
-               (table.concat (icollect [_ [ix iy] (ipairs x)]
-                                       (.. "[" ix " " iy "]"))
-                             " ")
-               "]")))
-
 (fn love.update [dt]
     (when (= STATE :Playing)
       (if (= 0 (length apples)) (table.insert apples (Apple:new snake.body)))
@@ -125,7 +136,6 @@
         (do
           (set total-dt (- total-dt snake.speed))
           (let [{:body [[head-x head-y]]
-                 :dir [dir-x dir-y]
                  :new-dir [new-dir-x new-dir-y]} snake
                 new-x (+ head-x new-dir-x )
                 new-y (+ head-y new-dir-y)
@@ -141,14 +151,30 @@
     (love.graphics.print "Press j to start game :-p" 100 200))
 
 (fn show-game-over []
+    (love.graphics.setColor 0.8 0.2 0.2)
     (let [text "Game Over!"
           font (love.graphics.getFont)
           fontWidth (font:getWidth text)
           fontHeight (font:getHeight)
           (winWidth winHeight) (love.graphics.getDimensions)]
-      (love.graphics.print "Game Over!"
+      (love.graphics.print text
                            (- (/ winWidth 2) (/ fontWidth 2))
                            (- (/ winHeight 2) (/ fontHeight 2)))))
+
+(fn draw-grid []
+    (love.graphics.setColor 0.4 0.4 0.4)
+    (love.graphics.rectangle :line
+                             (_ margin-left)
+                             (_ margin-top)
+                             (* play-width NODE-LENGTH)
+                             (* play-height NODE-LENGTH)
+                             CORNER-LENGTH
+                             CORNER-LENGTH)
+    (for [x 1 (- play-width 1)]
+         (for [y 1 (- play-height 1)]
+              (love.graphics.points
+                (+ (* x NODE-LENGTH) (_ margin-left))
+                (+ (* y NODE-LENGTH) (_ margin-top))))))
 
 (fn draw-apples []
     (love.graphics.setColor 0.8 0.2 0.2)
@@ -159,11 +185,15 @@
     (love.graphics.setColor 0.2 0.8 0.2)
     (snake:draw))
 
-(fn draw-grid []
+(fn draw-board []
     (love.graphics.setColor 0.4 0.4 0.4)
-    (for [x 0 WIDTH]
-         (for [y 0 HEIGHT]
-              (love.graphics.points (* x NODE-LENGTH) (* y NODE-LENGTH)))))
+    (love.graphics.rectangle :line
+                             (_ margin-left 1 play-width)
+                             (_ margin-top)
+                             (_ board-width)
+                             (_ board-height)
+                             CORNER-LENGTH
+                             CORNER-LENGTH))
 
 (fn love.draw []
     (case STATE
@@ -171,5 +201,6 @@
       :Playing (do
                  (draw-grid)
                  (draw-apples)
-                 (draw-snake))
+                 (draw-snake)
+                 (draw-board))
       :GameOver (show-game-over)))
