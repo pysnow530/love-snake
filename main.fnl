@@ -8,6 +8,7 @@
 (global move-sound nil)
 (global move2-sound nil)
 (global eat-sound nil)
+(global gg-sound nil)
 
 ;; ui
 (global margin-left 1)
@@ -123,7 +124,8 @@
     ;; init audio
     (set move-sound (love.audio.newSource "audio/move.wav" :static))
     (set move2-sound (love.audio.newSource "audio/move2.wav" :static))
-    (set eat-sound (love.audio.newSource "audio/eat.wav" :static)))
+    (set eat-sound (love.audio.newSource "audio/eat.wav" :static))
+    (set gg-sound (love.audio.newSource "audio/gg.wav" :static)))
 
 (fn love.keypressed [key _ _]
     (case STATE
@@ -147,7 +149,7 @@
                 new-y (+ head-y new-dir-y)
                 next-pos-type (predicate-type [new-x new-y])]
             (case next-pos-type
-              :wall (set STATE :GameOver)
+              :wall (do (love.audio.play gg-sound) (set STATE :GameOver))
               :body (set STATE :GameOver)
               :apple (do (inc move-count) (snake:eat eat-sound) (table.remove apples))
               nil (do (inc move-count) (snake:move (if (= 0 (% move-count 4))

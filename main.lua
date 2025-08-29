@@ -4,6 +4,7 @@ STATE = "Welcome"
 __fnl_global__move_2dsound = nil
 __fnl_global__move2_2dsound = nil
 __fnl_global__eat_2dsound = nil
+__fnl_global__gg_2dsound = nil
 __fnl_global__margin_2dleft = 1
 __fnl_global__margin_2dtop = 1
 __fnl_global__margin_2dright = 1
@@ -186,6 +187,7 @@ love.load = function()
   __fnl_global__move_2dsound = love.audio.newSource("audio/move.wav", "static")
   __fnl_global__move2_2dsound = love.audio.newSource("audio/move2.wav", "static")
   __fnl_global__eat_2dsound = love.audio.newSource("audio/eat.wav", "static")
+  __fnl_global__gg_2dsound = love.audio.newSource("audio/gg.wav", "static")
   return nil
 end
 love.keypressed = function(key, _0, _1)
@@ -228,6 +230,7 @@ love.update = function(dt)
       local new_y = (head_y + new_dir_y)
       local next_pos_type = predicate_type({new_x, new_y})
       if (next_pos_type == "wall") then
+        love.audio.play(__fnl_global__gg_2dsound)
         STATE = "GameOver"
         return nil
       elseif (next_pos_type == "body") then
