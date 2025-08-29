@@ -6,6 +6,7 @@
 
 ;; audio
 (global move-sound nil)
+(global move2-sound nil)
 (global eat-sound nil)
 
 ;; ui
@@ -17,6 +18,8 @@
 (global play-height 20)
 (global board-width 10)
 (global board-height 20)
+
+(global move-count 0)
 
 (fn _ [...] (* NODE-LENGTH
                (accumulate [total 0
@@ -119,6 +122,7 @@
       (love.graphics.setFont font))
     ;; init audio
     (set move-sound (love.audio.newSource "audio/move.wav" :static))
+    (set move2-sound (love.audio.newSource "audio/move2.wav" :static))
     (set eat-sound (love.audio.newSource "audio/eat.wav" :static)))
 
 (fn love.keypressed [key _ _]
@@ -127,6 +131,8 @@
       :Playing (case key
                  :j (snake:turn-left)
                  :k (snake:turn-right))))
+
+(macro inc [x] `(set ,x (+ ,x 1)))
 
 (fn love.update [dt]
     (when (= STATE :Playing)
@@ -143,8 +149,10 @@
             (case next-pos-type
               :wall (set STATE :GameOver)
               :body (set STATE :GameOver)
-              :apple (do (snake:eat eat-sound) (table.remove apples))
-              nil (snake:move move-sound)))))))
+              :apple (do (inc move-count) (snake:eat eat-sound) (table.remove apples))
+              nil (do (inc move-count) (snake:move (if (= 0 (% move-count 4))
+                                                     move2-sound
+                                                     move-sound)))))))))
 
 (fn show-welcome []
     (love.graphics.print "Welcome to snake, powered by love2d!" 100 100)

@@ -2,6 +2,7 @@ __fnl_global__NODE_2dLENGTH = 20
 __fnl_global__CORNER_2dLENGTH = __fnl_global__CORNER_2dLENGTH
 STATE = "Welcome"
 __fnl_global__move_2dsound = nil
+__fnl_global__move2_2dsound = nil
 __fnl_global__eat_2dsound = nil
 __fnl_global__margin_2dleft = 1
 __fnl_global__margin_2dtop = 1
@@ -11,6 +12,7 @@ __fnl_global__play_2dwidth = 20
 __fnl_global__play_2dheight = 20
 __fnl_global__board_2dwidth = 10
 __fnl_global__board_2dheight = 20
+__fnl_global__move_2dcount = 0
 local function _(...)
   local _1_
   do
@@ -182,6 +184,7 @@ love.load = function()
     love.graphics.setFont(font)
   end
   __fnl_global__move_2dsound = love.audio.newSource("audio/move.wav", "static")
+  __fnl_global__move2_2dsound = love.audio.newSource("audio/move2.wav", "static")
   __fnl_global__eat_2dsound = love.audio.newSource("audio/eat.wav", "static")
   return nil
 end
@@ -231,10 +234,19 @@ love.update = function(dt)
         STATE = "GameOver"
         return nil
       elseif (next_pos_type == "apple") then
+        __fnl_global__move_2dcount = (__fnl_global__move_2dcount + 1)
         snake:eat(__fnl_global__eat_2dsound)
         return table.remove(apples)
       elseif (next_pos_type == nil) then
-        return snake:move(__fnl_global__move_2dsound)
+        __fnl_global__move_2dcount = (__fnl_global__move_2dcount + 1)
+        local function _30_()
+          if (0 == (__fnl_global__move_2dcount % 4)) then
+            return __fnl_global__move2_2dsound
+          else
+            return __fnl_global__move_2dsound
+          end
+        end
+        return snake:move(_30_())
       else
         return nil
       end
@@ -270,10 +282,10 @@ local function draw_grid()
 end
 local function draw_apples()
   love.graphics.setColor(0.8, 0.2, 0.2)
-  for _0, _33_ in ipairs(apples) do
-    local _each_34_ = _33_["pos"]
-    local x = _each_34_[1]
-    local y = _each_34_[2]
+  for _0, _34_ in ipairs(apples) do
+    local _each_35_ = _34_["pos"]
+    local x = _each_35_[1]
+    local y = _each_35_[2]
     draw_box(x, y)
   end
   return nil
