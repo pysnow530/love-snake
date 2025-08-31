@@ -1,5 +1,5 @@
 (global NODE-LENGTH 20)
-(global CORNER-LENGTH CORNER-LENGTH)
+(global CORNER-LENGTH (* NODE-LENGTH 0.3))
 (global SPEED-GAP-MAX 0.50)
 (global SPEED-GAP-MIN 0.25)
 (global FULL-SPEED-LENGTH 20) ;; after exceed length, come to the SPEED-GAP-MAX
@@ -39,10 +39,9 @@
 
 (global DIRS {:up [0 -1] :right [1 0] :down [0 1] :left [-1 0]})
 
-(fn _ [...] (* NODE-LENGTH
-               (accumulate [total 0
-                            _ x (ipairs [...])]
-                           (+ total x))))
+(fn sum [...] (accumulate [total 0 _ v (ipairs [...])] (+ total v)))
+
+(fn $ [...] (* NODE-LENGTH (sum ...)))
 
 (fn lst= [lst1 lst2]
     (and (= (length lst1) (length lst2))
@@ -98,12 +97,12 @@
 (fn draw-box [x y]
     (love.graphics.rectangle
       :fill
-      (+ (* x NODE-LENGTH) (_ margin-left))
-      (+ (* y NODE-LENGTH) (_ margin-top))
+      (+ (* x NODE-LENGTH) ($ margin-left))
+      (+ (* y NODE-LENGTH) ($ margin-top))
       NODE-LENGTH
       NODE-LENGTH
-      (* NODE-LENGTH 0.3)
-      (* NODE-LENGTH 0.3)))
+      CORNER-LENGTH
+      CORNER-LENGTH))
 
 (fn Snake.draw [self]
     (each [_ [x y] (ipairs self.body)]
@@ -149,8 +148,8 @@
 
 (fn love.load []
     ;; window size
-    (love.window.setMode (_ margin-left play-width 1 board-width 1)
-                         (_ margin-top play-height margin-bottom))
+    (love.window.setMode ($ margin-left play-width 1 board-width 1)
+                         ($ margin-top play-height margin-bottom))
     ;; init font
     (let [font (love.graphics.newFont 16)]
       (love.graphics.setFont font))
@@ -189,7 +188,7 @@
                 next-pos-type (predicate-type [new-x new-y])]
             (case next-pos-type
               :wall (do (love.audio.play gg-sound) (set STATE :GameOver))
-              :body (set STATE :GameOver)
+              :body (do (love.audio.play gg-sound) (set STATE :GameOver))
               :apple (do (inc move-count) (snake:eat eat-sound) (table.remove apples))
               nil (do (inc move-count) (snake:move (if (= 0 (% move-count 4))
                                                      move2-sound
@@ -213,17 +212,12 @@
 (fn draw-grid []
     (love.graphics.setColor 0.4 0.4 0.4)
     (love.graphics.rectangle :line
-                             (_ margin-left)
-                             (_ margin-top)
-                             (* play-width NODE-LENGTH)
-                             (* play-height NODE-LENGTH)
-                             CORNER-LENGTH
-                             CORNER-LENGTH)
+                             ($ margin-left) ($ margin-top)
+                             ($ play-width) ($ play-height)
+                             CORNER-LENGTH CORNER-LENGTH)
     (for [x 1 (- play-width 1)]
          (for [y 1 (- play-height 1)]
-              (love.graphics.points
-                (+ (* x NODE-LENGTH) (_ margin-left))
-                (+ (* y NODE-LENGTH) (_ margin-top))))))
+              (love.graphics.points ($ x margin-left) ($ y margin-top)))))
 
 (fn draw-apples []
     (love.graphics.setColor 0.8 0.2 0.2)
@@ -237,12 +231,9 @@
 (fn draw-board []
     (love.graphics.setColor 0.4 0.4 0.4)
     (love.graphics.rectangle :line
-                             (_ margin-left 1 play-width)
-                             (_ margin-top)
-                             (_ board-width)
-                             (_ board-height)
-                             CORNER-LENGTH
-                             CORNER-LENGTH))
+                             ($ margin-left 1 play-width) ($ margin-top)
+                             ($ board-width) ($ board-height)
+                             CORNER-LENGTH CORNER-LENGTH))
 
 (fn love.draw []
     (case STATE
