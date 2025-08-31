@@ -22,10 +22,27 @@
 
 (global move-count 0)
 
+(global DIRS {:up [0 -1] :right [1 0] :down [0 1] :left [-1 0]})
+
 (fn _ [...] (* NODE-LENGTH
                (accumulate [total 0
                             _ x (ipairs [...])]
                            (+ total x))))
+
+(fn lst= [lst1 lst2]
+    (and (= (length lst1) (length lst2))
+         (= (length lst1) (length (icollect [k v (ipairs lst1)]
+                                            (if (= (. lst2 k) v)
+                                              true))))))
+
+(fn in [x lst]
+    (let [eq (if (= (type x) :table)
+               lst=
+               (fn [x y] (= x y)))]
+      (> (length (icollect [_ v (ipairs lst)]
+                           (if (eq x v)
+                             1)))
+         0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; snake ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (local Snake {})
@@ -128,11 +145,17 @@
     (set gg-sound (love.audio.newSource "audio/gg.wav" :static)))
 
 (fn love.keypressed [key _ _]
-    (case STATE
-      :Welcome (if (= key :j) (set STATE :Playing))
-      :Playing (case key
-                 :j (snake:turn-left)
-                 :k (snake:turn-right))))
+    (let [{: up : right : down : left} DIRS
+          {: dir} snake]
+      (case STATE
+        :Welcome (if (= key :space) (set STATE :Playing))
+        :Playing (case key
+                   :j (snake:turn-left)
+                   :k (snake:turn-right)
+                   :up (if (in dir [left up right]) (set snake.new-dir up))
+                   :right (if (in dir [up right down]) (set snake.new-dir right))
+                   :down (if (in dir [right down left]) (set snake.new-dir down))
+                   :left (if (in dir [down left up]) (set snake.new-dir left))))))
 
 (macro inc [x] `(set ,x (+ ,x 1)))
 
@@ -145,7 +168,7 @@
           (set total-dt (- total-dt snake.speed))
           (let [{:body [[head-x head-y]]
                  :new-dir [new-dir-x new-dir-y]} snake
-                new-x (+ head-x new-dir-x )
+                new-x (+ head-x new-dir-x)
                 new-y (+ head-y new-dir-y)
                 next-pos-type (predicate-type [new-x new-y])]
             (case next-pos-type
@@ -157,8 +180,8 @@
                                                      move-sound)))))))))
 
 (fn show-welcome []
-    (love.graphics.print "Welcome to snake, powered by love2d!" 100 100)
-    (love.graphics.print "Press j to start game :-p" 100 200))
+    (love.graphics.print "Welcome to snake, powered by love2d!" 100 150)
+    (love.graphics.print "Press SPACE to start game :-p" 100 200))
 
 (fn show-game-over []
     (love.graphics.setColor 0.8 0.2 0.2)

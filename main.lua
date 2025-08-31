@@ -14,6 +14,7 @@ __fnl_global__play_2dheight = 20
 __fnl_global__board_2dwidth = 10
 __fnl_global__board_2dheight = 20
 __fnl_global__move_2dcount = 0
+DIRS = {up = {0, -1}, right = {1, 0}, down = {0, 1}, left = {-1, 0}}
 local function _(...)
   local _1_
   do
@@ -25,6 +26,63 @@ local function _(...)
   end
   return (__fnl_global__NODE_2dLENGTH * _1_)
 end
+local function lst_3d(lst1, lst2)
+  local and_2_ = (#lst1 == #lst2)
+  if and_2_ then
+    local _3_
+    do
+      local tbl_21_ = {}
+      local i_22_ = 0
+      for k, v in ipairs(lst1) do
+        local val_23_
+        if (lst2[k] == v) then
+          val_23_ = true
+        else
+          val_23_ = nil
+        end
+        if (nil ~= val_23_) then
+          i_22_ = (i_22_ + 1)
+          tbl_21_[i_22_] = val_23_
+        else
+        end
+      end
+      _3_ = tbl_21_
+    end
+    and_2_ = (#lst1 == #_3_)
+  end
+  return and_2_
+end
+local function _in(x, lst)
+  local eq
+  if (type(x) == "table") then
+    eq = lst_3d
+  else
+    local function _6_(x0, y)
+      return (x0 == y)
+    end
+    eq = _6_
+  end
+  local _8_
+  do
+    local tbl_21_ = {}
+    local i_22_ = 0
+    for _0, v in ipairs(lst) do
+      local val_23_
+      if eq(x, v) then
+        val_23_ = 1
+      else
+        val_23_ = nil
+      end
+      if (nil ~= val_23_) then
+        i_22_ = (i_22_ + 1)
+        tbl_21_[i_22_] = val_23_
+      else
+      end
+    end
+    _8_ = tbl_21_
+  end
+  return (#_8_ > 0)
+end
 local Snake = {}
 Snake.new = function(cls, dir, body, speed)
   local obj = setmetatable({dir = dir, body = body, speed = speed, ["new-dir"] = dir}, {__index = cls})
@@ -32,13 +90,13 @@ Snake.new = function(cls, dir, body, speed)
 end
 Snake.eat = function(self, sound)
   self.dir = self["new-dir"]
-  local _let_2_ = self["body"]
-  local _let_3_ = _let_2_[1]
-  local head_x = _let_3_[1]
-  local head_y = _let_3_[2]
-  local _let_4_ = self["dir"]
-  local dir_x = _let_4_[1]
-  local dir_y = _let_4_[2]
+  local _let_11_ = self["body"]
+  local _let_12_ = _let_11_[1]
+  local head_x = _let_12_[1]
+  local head_y = _let_12_[2]
+  local _let_13_ = self["dir"]
+  local dir_x = _let_13_[1]
+  local dir_y = _let_13_[2]
   local new_x = (head_x + dir_x)
   local new_y = (head_y + dir_y)
   table.insert(self.body, 1, {new_x, new_y})
@@ -46,13 +104,13 @@ Snake.eat = function(self, sound)
 end
 Snake.move = function(self, sound)
   self.dir = self["new-dir"]
-  local _let_5_ = self["body"]
-  local _let_6_ = _let_5_[1]
-  local head_x = _let_6_[1]
-  local head_y = _let_6_[2]
-  local _let_7_ = self["dir"]
-  local dir_x = _let_7_[1]
-  local dir_y = _let_7_[2]
+  local _let_14_ = self["body"]
+  local _let_15_ = _let_14_[1]
+  local head_x = _let_15_[1]
+  local head_y = _let_15_[2]
+  local _let_16_ = self["dir"]
+  local dir_x = _let_16_[1]
+  local dir_y = _let_16_[2]
   local new_x = (head_x + dir_x)
   local new_y = (head_y + dir_y)
   table.insert(self.body, 1, {new_x, new_y})
@@ -75,9 +133,9 @@ local function draw_box(x, y)
   return love.graphics.rectangle("fill", ((x * __fnl_global__NODE_2dLENGTH) + _(__fnl_global__margin_2dleft)), ((y * __fnl_global__NODE_2dLENGTH) + _(__fnl_global__margin_2dtop)), __fnl_global__NODE_2dLENGTH, __fnl_global__NODE_2dLENGTH, (__fnl_global__NODE_2dLENGTH * 0.3), (__fnl_global__NODE_2dLENGTH * 0.3))
 end
 Snake.draw = function(self)
-  for _0, _8_ in ipairs(self.body) do
-    local x = _8_[1]
-    local y = _8_[2]
+  for _0, _17_ in ipairs(self.body) do
+    local x = _17_[1]
+    local y = _17_[2]
     draw_box(x, y)
   end
   return nil
@@ -87,13 +145,13 @@ Apple.new = function(cls, snake_body)
   local x = math.random(0, (__fnl_global__play_2dwidth - 1))
   local y = math.random(0, (__fnl_global__play_2dheight - 1))
   while true do
-    local _9_
+    local _18_
     do
       local tbl_21_ = {}
       local i_22_ = 0
-      for _0, _10_ in ipairs(snake_body) do
-        local ix = _10_[1]
-        local iy = _10_[2]
+      for _0, _19_ in ipairs(snake_body) do
+        local ix = _19_[1]
+        local iy = _19_[2]
         local val_23_
         if ((ix == x) and (iy == y)) then
           val_23_ = 1
@@ -106,9 +164,9 @@ Apple.new = function(cls, snake_body)
         else
         end
       end
-      _9_ = tbl_21_
+      _18_ = tbl_21_
     end
-    if not (#_9_ > 0) then break end
+    if not (#_18_ > 0) then break end
     x = math.random(0, (__fnl_global__play_2dwidth - 1))
     y = math.random(0, (__fnl_global__play_2dheight - 1))
   end
@@ -134,24 +192,24 @@ local function all_but_last(x)
   end
   return tbl_21_
 end
-local function predicate_type(_15_)
-  local x = _15_[1]
-  local y = _15_[2]
-  local _let_16_ = apples[1]
-  local _let_17_ = _let_16_["pos"]
-  local apple_x = _let_17_[1]
-  local apple_y = _let_17_[2]
+local function predicate_type(_24_)
+  local x = _24_[1]
+  local y = _24_[2]
+  local _let_25_ = apples[1]
+  local _let_26_ = _let_25_["pos"]
+  local apple_x = _let_26_[1]
+  local apple_y = _let_26_[2]
   local body = all_but_last(snake.body)
   if ((x < 0) or (x >= __fnl_global__play_2dwidth) or (y < 0) or (y >= __fnl_global__play_2dheight)) then
     return "wall"
   else
-    local _18_
+    local _27_
     do
       local tbl_21_ = {}
       local i_22_ = 0
-      for _0, _19_ in ipairs(body) do
-        local ix = _19_[1]
-        local iy = _19_[2]
+      for _0, _28_ in ipairs(body) do
+        local ix = _28_[1]
+        local iy = _28_[2]
         local val_23_
         if ((ix == x) and (iy == y)) then
           val_23_ = 1
@@ -164,9 +222,9 @@ local function predicate_type(_15_)
         else
         end
       end
-      _18_ = tbl_21_
+      _27_ = tbl_21_
     end
-    if (#_18_ > 0) then
+    if (#_27_ > 0) then
       return "body"
     elseif ((x == apple_x) and (y == apple_y)) then
       return "apple"
@@ -191,8 +249,13 @@ love.load = function()
   return nil
 end
 love.keypressed = function(key, _0, _1)
+  local up = DIRS["up"]
+  local right = DIRS["right"]
+  local down = DIRS["down"]
+  local left = DIRS["left"]
+  local dir = snake["dir"]
   if (STATE == "Welcome") then
-    if (key == "j") then
+    if (key == "space") then
       STATE = "Playing"
       return nil
     else
@@ -203,6 +266,34 @@ love.keypressed = function(key, _0, _1)
       return snake["turn-left"](snake)
     elseif (key == "k") then
       return snake["turn-right"](snake)
+    elseif (key == "up") then
+      if _in(dir, {left, up, right}) then
+        snake["new-dir"] = up
+        return nil
+      else
+        return nil
+      end
+    elseif (key == "right") then
+      if _in(dir, {up, right, down}) then
+        snake["new-dir"] = right
+        return nil
+      else
+        return nil
+      end
+    elseif (key == "down") then
+      if _in(dir, {right, down, left}) then
+        snake["new-dir"] = down
+        return nil
+      else
+        return nil
+      end
+    elseif (key == "left") then
+      if _in(dir, {down, left, up}) then
+        snake["new-dir"] = left
+        return nil
+      else
+        return nil
+      end
     else
       return nil
     end
@@ -219,13 +310,13 @@ love.update = function(dt)
     total_dt = (total_dt + dt)
     if (total_dt > snake.speed) then
       total_dt = (total_dt - snake.speed)
-      local _let_27_ = snake["body"]
-      local _let_28_ = _let_27_[1]
-      local head_x = _let_28_[1]
-      local head_y = _let_28_[2]
-      local _let_29_ = snake["new-dir"]
-      local new_dir_x = _let_29_[1]
-      local new_dir_y = _let_29_[2]
+      local _let_40_ = snake["body"]
+      local _let_41_ = _let_40_[1]
+      local head_x = _let_41_[1]
+      local head_y = _let_41_[2]
+      local _let_42_ = snake["new-dir"]
+      local new_dir_x = _let_42_[1]
+      local new_dir_y = _let_42_[2]
       local new_x = (head_x + new_dir_x)
       local new_y = (head_y + new_dir_y)
       local next_pos_type = predicate_type({new_x, new_y})
@@ -242,14 +333,14 @@ love.update = function(dt)
         return table.remove(apples)
       elseif (next_pos_type == nil) then
         __fnl_global__move_2dcount = (__fnl_global__move_2dcount + 1)
-        local function _30_()
+        local function _43_()
           if (0 == (__fnl_global__move_2dcount % 4)) then
             return __fnl_global__move2_2dsound
           else
             return __fnl_global__move_2dsound
           end
         end
-        return snake:move(_30_())
+        return snake:move(_43_())
       else
         return nil
       end
@@ -261,8 +352,8 @@ love.update = function(dt)
   end
 end
 local function show_welcome()
-  love.graphics.print("Welcome to snake, powered by love2d!", 100, 100)
-  return love.graphics.print("Press j to start game :-p", 100, 200)
+  love.graphics.print("Welcome to snake, powered by love2d!", 100, 150)
+  return love.graphics.print("Press SPACE to start game :-p", 100, 200)
 end
 local function show_game_over()
   love.graphics.setColor(0.8, 0.2, 0.2)
@@ -285,10 +376,10 @@ local function draw_grid()
 end
 local function draw_apples()
   love.graphics.setColor(0.8, 0.2, 0.2)
-  for _0, _34_ in ipairs(apples) do
-    local _each_35_ = _34_["pos"]
-    local x = _each_35_[1]
-    local y = _each_35_[2]
+  for _0, _47_ in ipairs(apples) do
+    local _each_48_ = _47_["pos"]
+    local x = _each_48_[1]
+    local y = _each_48_[2]
     draw_box(x, y)
   end
   return nil
