@@ -4,6 +4,22 @@
 (global SPEED-GAP-MIN 0.25)
 (global FULL-SPEED-LENGTH 20) ;; after exceed length, come to the SPEED-GAP-MAX
 
+;; ui
+(global margin-left 1)
+(global margin-top 1)
+(global margin-right 1)
+(global margin-bottom 1)
+(global play-width 20)
+(global play-height 20)
+(global board-width 10)
+(global board-height 20)
+
+(fn sum [...] (accumulate [total 0 _ v (ipairs [...])] (+ total v)))
+(fn $ [...] (* NODE-LENGTH (sum ...)))
+
+(local win-width ($ margin-left play-width 1 board-width 1))
+(local win-height ($ margin-top play-height margin-bottom))
+
 (fn clamp [x min max]
     (if
       (< x min) min
@@ -25,23 +41,9 @@
 (global eat-sound nil)
 (global gg-sound nil)
 
-;; ui
-(global margin-left 1)
-(global margin-top 1)
-(global margin-right 1)
-(global margin-bottom 1)
-(global play-width 20)
-(global play-height 20)
-(global board-width 10)
-(global board-height 20)
-
 (global move-count 0)
 
 (global DIRS {:up [0 -1] :right [1 0] :down [0 1] :left [-1 0]})
-
-(fn sum [...] (accumulate [total 0 _ v (ipairs [...])] (+ total v)))
-
-(fn $ [...] (* NODE-LENGTH (sum ...)))
 
 (fn lst= [lst1 lst2]
     (and (= (length lst1) (length lst2))
@@ -147,12 +149,8 @@
 (var total-dt 0)
 
 (fn love.load []
-    ;; window size
-    (love.window.setMode ($ margin-left play-width 1 board-width 1)
-                         ($ margin-top play-height margin-bottom))
-    ;; init font
-    (let [font (love.graphics.newFont 16)]
-      (love.graphics.setFont font))
+    (love.window.setMode win-width win-height)
+
     ;; init audio
     (set move-sound (love.audio.newSource "audio/move.wav" :static))
     (set move2-sound (love.audio.newSource "audio/move2.wav" :static))
@@ -194,20 +192,38 @@
                                                      move2-sound
                                                      move-sound)))))))))
 
+(macro half [x] `(* ,x 0.5))
+
+(fn print-text [str x y h-mode v-mode size [r g b a]]
+    "h-mode: :left or :center, v-mode: :top or :middle"
+    (let [font (love.graphics.newFont size)
+          width (font:getWidth str)
+          height (font:getHeight str)
+          new-x (if
+                  (= h-mode :left) x
+                  (= h-mode :center) (- x (half width)))
+          new-y (if
+                  (= v-mode :top) y
+                  (= v-mode :middle) (- y (half height)))]
+      (love.graphics.setColor r g b a)
+      (love.graphics.setFont font)
+      (love.graphics.print str new-x new-y)))
+
 (fn show-welcome []
-    (love.graphics.print "Welcome to snake, powered by love2d!" 100 150)
-    (love.graphics.print "Press SPACE to start game :-p" 100 200))
+    (let [size 18
+          color [0.8 0.8 0.8 1.0]
+          line-space 0.4]
+      (print-text "Welcome to snake, powered by love2d!"
+                  (half win-width) (- (half win-height) (half size) (* size line-space 0.5))
+                  :center :middle size color)
+      (print-text "Press <<<SPACE>>> to start game"
+                  (half win-width) (+ (half win-height) (half size) (* size line-space 0.5))
+                  :center :middle size color)))
 
 (fn show-game-over []
-    (love.graphics.setColor 0.8 0.2 0.2)
-    (let [text "Game Over!"
-          font (love.graphics.getFont)
-          fontWidth (font:getWidth text)
-          fontHeight (font:getHeight)
-          (winWidth winHeight) (love.graphics.getDimensions)]
-      (love.graphics.print text
-                           (- (/ winWidth 2) (/ fontWidth 2))
-                           (- (/ winHeight 2) (/ fontHeight 2)))))
+    (print-text "Game Over!"
+                (half win-width) (half win-height)
+                :center :middle 18 [0.8 0.2 0.2 1.0]))
 
 (fn draw-grid []
     (love.graphics.setColor 0.4 0.4 0.4)

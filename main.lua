@@ -3,6 +3,26 @@ __fnl_global__CORNER_2dLENGTH = (__fnl_global__NODE_2dLENGTH * 0.3)
 __fnl_global__SPEED_2dGAP_2dMAX = 0.5
 __fnl_global__SPEED_2dGAP_2dMIN = 0.25
 __fnl_global__FULL_2dSPEED_2dLENGTH = 20
+__fnl_global__margin_2dleft = 1
+__fnl_global__margin_2dtop = 1
+__fnl_global__margin_2dright = 1
+__fnl_global__margin_2dbottom = 1
+__fnl_global__play_2dwidth = 20
+__fnl_global__play_2dheight = 20
+__fnl_global__board_2dwidth = 10
+__fnl_global__board_2dheight = 20
+local function sum(...)
+  local total = 0
+  for _, v in ipairs({...}) do
+    total = (total + v)
+  end
+  return total
+end
+local function _24(...)
+  return (__fnl_global__NODE_2dLENGTH * sum(...))
+end
+local win_width = _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, __fnl_global__board_2dwidth, 1)
+local win_height = _24(__fnl_global__margin_2dtop, __fnl_global__play_2dheight, __fnl_global__margin_2dbottom)
 local function clamp(x, min, max)
   if (x < min) then
     return min
@@ -21,26 +41,8 @@ __fnl_global__move_2dsound = nil
 __fnl_global__move2_2dsound = nil
 __fnl_global__eat_2dsound = nil
 __fnl_global__gg_2dsound = nil
-__fnl_global__margin_2dleft = 1
-__fnl_global__margin_2dtop = 1
-__fnl_global__margin_2dright = 1
-__fnl_global__margin_2dbottom = 1
-__fnl_global__play_2dwidth = 20
-__fnl_global__play_2dheight = 20
-__fnl_global__board_2dwidth = 10
-__fnl_global__board_2dheight = 20
 __fnl_global__move_2dcount = 0
 DIRS = {up = {0, -1}, right = {1, 0}, down = {0, 1}, left = {-1, 0}}
-local function sum(...)
-  local total = 0
-  for _, v in ipairs({...}) do
-    total = (total + v)
-  end
-  return total
-end
-local function _24(...)
-  return (__fnl_global__NODE_2dLENGTH * sum(...))
-end
 local function lst_3d(lst1, lst2)
   local and_2_ = (#lst1 == #lst2)
   if and_2_ then
@@ -253,11 +255,7 @@ local function predicate_type(_24_)
 end
 local total_dt = 0
 love.load = function()
-  love.window.setMode(_24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, __fnl_global__board_2dwidth, 1), _24(__fnl_global__margin_2dtop, __fnl_global__play_2dheight, __fnl_global__margin_2dbottom))
-  do
-    local font = love.graphics.newFont(16)
-    love.graphics.setFont(font)
-  end
+  love.window.setMode(win_width, win_height)
   __fnl_global__move_2dsound = love.audio.newSource("audio/move.wav", "static")
   __fnl_global__move2_2dsound = love.audio.newSource("audio/move2.wav", "static")
   __fnl_global__eat_2dsound = love.audio.newSource("audio/eat.wav", "static")
@@ -368,18 +366,43 @@ love.update = function(dt)
     return nil
   end
 end
+local function print_text(str, x, y, h_mode, v_mode, size, _47_)
+  local r = _47_[1]
+  local g = _47_[2]
+  local b = _47_[3]
+  local a = _47_[4]
+  local font = love.graphics.newFont(size)
+  local width = font:getWidth(str)
+  local height = font:getHeight(str)
+  local new_x
+  if (h_mode == "left") then
+    new_x = x
+  elseif (h_mode == "center") then
+    new_x = (x - (width * 0.5))
+  else
+    new_x = nil
+  end
+  local new_y
+  if (v_mode == "top") then
+    new_y = y
+  elseif (v_mode == "middle") then
+    new_y = (y - (height * 0.5))
+  else
+    new_y = nil
+  end
+  love.graphics.setColor(r, g, b, a)
+  love.graphics.setFont(font)
+  return love.graphics.print(str, new_x, new_y)
+end
 local function show_welcome()
-  love.graphics.print("Welcome to snake, powered by love2d!", 100, 150)
-  return love.graphics.print("Press SPACE to start game :-p", 100, 200)
+  local size = 18
+  local color = {0.8, 0.8, 0.8, 1}
+  local line_space = 0.4
+  print_text("Welcome to snake, powered by love2d!", (win_width * 0.5), ((win_height * 0.5) - (size * 0.5) - (size * line_space * 0.5)), "center", "middle", size, color)
+  return print_text("Press <<<SPACE>>> to start game", (win_width * 0.5), ((win_height * 0.5) + (size * 0.5) + (size * line_space * 0.5)), "center", "middle", size, color)
 end
 local function show_game_over()
-  love.graphics.setColor(0.8, 0.2, 0.2)
-  local text = "Game Over!"
-  local font = love.graphics.getFont()
-  local fontWidth = font:getWidth(text)
-  local fontHeight = font:getHeight()
-  local winWidth, winHeight = love.graphics.getDimensions()
-  return love.graphics.print(text, ((winWidth / 2) - (fontWidth / 2)), ((winHeight / 2) - (fontHeight / 2)))
+  return print_text("Game Over!", (win_width * 0.5), (win_height * 0.5), "center", "middle", 18, {0.8, 0.2, 0.2, 1})
 end
 local function draw_grid()
   love.graphics.setColor(0.4, 0.4, 0.4)
@@ -393,10 +416,10 @@ local function draw_grid()
 end
 local function draw_apples()
   love.graphics.setColor(0.8, 0.2, 0.2)
-  for _, _47_ in ipairs(apples) do
-    local _each_48_ = _47_["pos"]
-    local x = _each_48_[1]
-    local y = _each_48_[2]
+  for _, _50_ in ipairs(apples) do
+    local _each_51_ = _50_["pos"]
+    local x = _each_51_[1]
+    local y = _each_51_[2]
     draw_box(x, y)
   end
   return nil
