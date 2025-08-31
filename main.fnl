@@ -1,5 +1,20 @@
 (global NODE-LENGTH 20)
 (global CORNER-LENGTH CORNER-LENGTH)
+(global SPEED-GAP-MAX 0.50)
+(global SPEED-GAP-MIN 0.25)
+(global FULL-SPEED-LENGTH 20) ;; after exceed length, come to the SPEED-GAP-MAX
+
+(fn clamp [x min max]
+    (if
+      (< x min) min
+      (> x max) max
+      true x))
+
+;; speed function
+;; y = -(SPEED-GAP-MAX - SPEED-GAP-MIN) / FULL-SPEED-LENGTH * x + SPEED-GAP-MAX -> clamp [SPEED-GAP-MIN SPEED-GAP-MAX]
+(fn speed [len]
+    (let [y (- SPEED-GAP-MAX (/ (* (- SPEED-GAP-MAX SPEED-GAP-MIN) len) FULL-SPEED-LENGTH))]
+      (clamp y SPEED-GAP-MIN SPEED-GAP-MAX)))
 
 ;; global state
 (global STATE :Welcome)
@@ -59,6 +74,7 @@
           new-x (+ head-x dir-x)
           new-y (+ head-y dir-y)]
       (table.insert self.body 1 [new-x new-y])
+      (set self.speed (speed (length self.body)))
       (love.audio.play sound)))
 
 (fn Snake.move [self sound]
@@ -110,7 +126,7 @@
     (setmetatable {:pos [x y]} {:__index cls}))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; /apple ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(local snake (Snake:new [1 0] [[0 (/ play-height 2)]] 0.5))
+(local snake (Snake:new [1 0] [[0 (/ play-height 2)]] SPEED-GAP-MAX))
 (local apples [])
 
 (fn all-but-last [x]
