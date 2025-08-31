@@ -433,6 +433,7 @@ local function draw_board()
   return love.graphics.rectangle("line", _24(__fnl_global__margin_2dleft, 1, __fnl_global__play_2dwidth), _24(__fnl_global__margin_2dtop), _24(__fnl_global__board_2dwidth), _24(__fnl_global__board_2dheight), __fnl_global__CORNER_2dLENGTH, __fnl_global__CORNER_2dLENGTH)
 end
 love.draw = function()
+  print_text(("fps: " .. love.timer.getFPS()), 0, 0, "left", "top", 14, {0.8, 0.8, 0.8, 1})
   if (STATE == "Welcome") then
     return show_welcome()
   elseif (STATE == "Playing") then

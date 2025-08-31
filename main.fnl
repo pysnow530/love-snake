@@ -44,6 +44,7 @@
 (global move-count 0)
 
 (global DIRS {:up [0 -1] :right [1 0] :down [0 1] :left [-1 0]})
+(local COLORS {:white COLORS.white})
 
 (fn lst= [lst1 lst2]
     (and (= (length lst1) (length lst2))
@@ -210,9 +211,7 @@
       (love.graphics.print str new-x new-y)))
 
 (fn show-welcome []
-    (let [size 18
-          color [0.8 0.8 0.8 1.0]
-          line-space 0.4]
+    (let [size 18 color COLORS.white line-space 0.4]
       (print-text "Welcome to snake, powered by love2d!"
                   (half win-width) (- (half win-height) (half size) (* size line-space 0.5))
                   :center :middle size color)
@@ -221,8 +220,7 @@
                   :center :middle size color)))
 
 (fn show-game-over []
-    (print-text "Game Over!"
-                (half win-width) (half win-height)
+    (print-text "Game Over!" (half win-width) (half win-height)
                 :center :middle 18 [0.8 0.2 0.2 1.0]))
 
 (fn draw-grid []
@@ -252,6 +250,7 @@
                              CORNER-LENGTH CORNER-LENGTH))
 
 (fn love.draw []
+    (print-text (.. "fps: " (love.timer.getFPS)) 0 0 :left :top 14 COLORS.white)
     (case STATE
       :Welcome (show-welcome)
       :Playing (do
