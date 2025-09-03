@@ -37,12 +37,15 @@ local function speed(len)
   return clamp(y, __fnl_global__SPEED_2dGAP_2dMIN, __fnl_global__SPEED_2dGAP_2dMAX)
 end
 STATE = "Welcome"
+local elapsed = 0
 __fnl_global__move_2dsound = nil
 __fnl_global__move2_2dsound = nil
 __fnl_global__eat_2dsound = nil
 __fnl_global__gg_2dsound = nil
 __fnl_global__move_2dcount = 0
 DIRS = {up = {0, -1}, right = {1, 0}, down = {0, 1}, left = {-1, 0}}
+local COLORS = {white = {0.8, 0.8, 0.8, 1}, gray = {0.5, 0.5, 0.5, 1}}
+local SIZES = {title = 18, subtitle = 16, text = 14}
 local function lst_3d(lst1, lst2)
   local and_2_ = (#lst1 == #lst2)
   if and_2_ then
@@ -273,6 +276,7 @@ love.keypressed = function(key, _, _0)
       STATE = "Playing"
       return nil
     else
+      elapsed = 0
       return nil
     end
   elseif (STATE == "Playing") then
@@ -317,6 +321,7 @@ love.keypressed = function(key, _, _0)
 end
 love.update = function(dt)
   if (STATE == "Playing") then
+    elapsed = (elapsed + dt)
     if (0 == #apples) then
       table.insert(apples, Apple:new(snake.body))
     else
@@ -395,11 +400,10 @@ local function print_text(str, x, y, h_mode, v_mode, size, _47_)
   return love.graphics.print(str, new_x, new_y)
 end
 local function show_welcome()
-  local size = 18
-  local color = {0.8, 0.8, 0.8, 1}
+  local color = COLORS.white
   local line_space = 0.4
-  print_text("Welcome to snake, powered by love2d!", (win_width * 0.5), ((win_height * 0.5) - (size * 0.5) - (size * line_space * 0.5)), "center", "middle", size, color)
-  return print_text("Press <<<SPACE>>> to start game", (win_width * 0.5), ((win_height * 0.5) + (size * 0.5) + (size * line_space * 0.5)), "center", "middle", size, color)
+  print_text("Welcome to snake, powered by love2d!", (win_width * 0.5), ((win_height * 0.5) - (SIZES.title * 0.5) - (SIZES.title * line_space * 0.5)), "center", "middle", SIZES.title, color)
+  return print_text("Press [SPACE] to start game", (win_width * 0.5), ((win_height * 0.5) + (SIZES.subtitle * 0.5) + (SIZES.subtitle * line_space * 0.5)), "center", "middle", SIZES.subtitle, color)
 end
 local function show_game_over()
   return print_text("Game Over!", (win_width * 0.5), (win_height * 0.5), "center", "middle", 18, {0.8, 0.2, 0.2, 1})
@@ -430,10 +434,12 @@ local function draw_snake()
 end
 local function draw_board()
   love.graphics.setColor(0.4, 0.4, 0.4)
-  return love.graphics.rectangle("line", _24(__fnl_global__margin_2dleft, 1, __fnl_global__play_2dwidth), _24(__fnl_global__margin_2dtop), _24(__fnl_global__board_2dwidth), _24(__fnl_global__board_2dheight), __fnl_global__CORNER_2dLENGTH, __fnl_global__CORNER_2dLENGTH)
+  love.graphics.rectangle("line", _24(__fnl_global__margin_2dleft, 1, __fnl_global__play_2dwidth), _24(__fnl_global__margin_2dtop), _24(__fnl_global__board_2dwidth), _24(__fnl_global__board_2dheight), __fnl_global__CORNER_2dLENGTH, __fnl_global__CORNER_2dLENGTH)
+  print_text(("Time elipsed: " .. string.format("%.0f", elapsed)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), _24(__fnl_global__margin_2dtop, 1), "left", "top", SIZES.text, COLORS.white)
+  return print_text(("Score: " .. (#snake.body * 10)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), (_24(__fnl_global__margin_2dtop, 1) + (SIZES.text * 1.4)), "left", "top", SIZES.text, COLORS.white)
 end
 love.draw = function()
-  print_text(("fps: " .. love.timer.getFPS()), 0, 0, "left", "top", 14, {0.8, 0.8, 0.8, 1})
+  print_text(("fps: " .. love.timer.getFPS()), 0, 0, "left", "top", 14, COLORS.white)
   if (STATE == "Welcome") then
     return show_welcome()
   elseif (STATE == "Playing") then

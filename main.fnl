@@ -34,6 +34,7 @@
 
 ;; global state
 (global STATE :Welcome)
+(var elapsed 0)
 
 ;; audio
 (global move-sound nil)
@@ -44,7 +45,8 @@
 (global move-count 0)
 
 (global DIRS {:up [0 -1] :right [1 0] :down [0 1] :left [-1 0]})
-(local COLORS {:white COLORS.white})
+(local COLORS {:white [0.8 0.8 0.8 1] :gray [0.5 0.5 0.5 1]})
+(local SIZES {:title 18 :subtitle 16 :text 14})
 
 (fn lst= [lst1 lst2]
     (and (= (length lst1) (length lst2))
@@ -162,7 +164,7 @@
     (let [{: up : right : down : left} DIRS
           {: dir} snake]
       (case STATE
-        :Welcome (if (= key :space) (set STATE :Playing))
+        :Welcome (if (= key :space) (set STATE :Playing) (set elapsed 0))
         :Playing (case key
                    :j (snake:turn-left)
                    :k (snake:turn-right)
@@ -175,6 +177,7 @@
 
 (fn love.update [dt]
     (when (= STATE :Playing)
+      (set elapsed (+ elapsed dt))
       (if (= 0 (length apples)) (table.insert apples (Apple:new snake.body)))
       (set total-dt (+ total-dt dt))
       (if (> total-dt snake.speed)
@@ -211,13 +214,14 @@
       (love.graphics.print str new-x new-y)))
 
 (fn show-welcome []
-    (let [size 18 color COLORS.white line-space 0.4]
+    (let [color COLORS.white line-space 0.4]
       (print-text "Welcome to snake, powered by love2d!"
-                  (half win-width) (- (half win-height) (half size) (* size line-space 0.5))
-                  :center :middle size color)
-      (print-text "Press <<<SPACE>>> to start game"
-                  (half win-width) (+ (half win-height) (half size) (* size line-space 0.5))
-                  :center :middle size color)))
+                  (half win-width)
+                  (- (half win-height) (half SIZES.title) (* SIZES.title line-space 0.5))
+                  :center :middle SIZES.title color)
+      (print-text "Press [SPACE] to start game"
+                  (half win-width) (+ (half win-height) (half SIZES.subtitle) (* SIZES.subtitle line-space 0.5))
+                  :center :middle SIZES.subtitle color)))
 
 (fn show-game-over []
     (print-text "Game Over!" (half win-width) (half win-height)
@@ -247,7 +251,17 @@
     (love.graphics.rectangle :line
                              ($ margin-left 1 play-width) ($ margin-top)
                              ($ board-width) ($ board-height)
-                             CORNER-LENGTH CORNER-LENGTH))
+                             CORNER-LENGTH CORNER-LENGTH)
+    (print-text (.. "Time elipsed: " (string.format "%.0f" elapsed))
+                ($ margin-left play-width 1 1)
+                ($ margin-top 1)
+                :left :top
+                SIZES.text COLORS.white)
+    (print-text (.. "Score: " (* (length snake.body) 10))
+                ($ margin-left play-width 1 1)
+                (+ ($ margin-top 1) (* SIZES.text 1.4))
+                :left :top
+                SIZES.text COLORS.white))
 
 (fn love.draw []
     (print-text (.. "fps: " (love.timer.getFPS)) 0 0 :left :top 14 COLORS.white)
