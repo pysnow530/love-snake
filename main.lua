@@ -21,8 +21,8 @@ end
 local function _24(...)
   return (__fnl_global__NODE_2dLENGTH * sum(...))
 end
-local win_width = _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, __fnl_global__board_2dwidth, 1)
-local win_height = _24(__fnl_global__margin_2dtop, __fnl_global__play_2dheight, __fnl_global__margin_2dbottom)
+__fnl_global__WIN_2dWIDTH = _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, __fnl_global__board_2dwidth, 1)
+__fnl_global__WIN_2dHEIGHT = _24(__fnl_global__margin_2dtop, __fnl_global__play_2dheight, __fnl_global__margin_2dbottom)
 local function clamp(x, min, max)
   if (x < min) then
     return min
@@ -42,9 +42,10 @@ __fnl_global__move_2dsound = nil
 __fnl_global__move2_2dsound = nil
 __fnl_global__eat_2dsound = nil
 __fnl_global__gg_2dsound = nil
+__fnl_global__bg_2dimg = nil
 __fnl_global__move_2dcount = 0
 DIRS = {up = {0, -1}, right = {1, 0}, down = {0, 1}, left = {-1, 0}}
-local COLORS = {white = {0.8, 0.8, 0.8, 1}, gray = {0.5, 0.5, 0.5, 1}}
+local COLORS = {white = {1, 1, 1, 1}, gray = {0.5, 0.5, 0.5, 1}, black = {0.2, 0.2, 0.2, 1}, red = {0.8, 0.2, 0.2, 1}}
 local SIZES = {title = 18, subtitle = 16, text = 14}
 local function lst_3d(lst1, lst2)
   local and_2_ = (#lst1 == #lst2)
@@ -261,11 +262,12 @@ local function predicate_type(_24_)
 end
 local total_dt = 0
 love.load = function()
-  love.window.setMode(win_width, win_height)
+  love.window.setMode(__fnl_global__WIN_2dWIDTH, __fnl_global__WIN_2dHEIGHT)
   __fnl_global__move_2dsound = love.audio.newSource("audio/move.wav", "static")
   __fnl_global__move2_2dsound = love.audio.newSource("audio/move2.wav", "static")
   __fnl_global__eat_2dsound = love.audio.newSource("audio/eat.wav", "static")
   __fnl_global__gg_2dsound = love.audio.newSource("audio/gg.wav", "static")
+  __fnl_global__bg_2dimg = love.graphics.newImage("imgs/bg.jpg")
   return nil
 end
 love.keypressed = function(key, _, _0)
@@ -398,18 +400,18 @@ local function print_text(str, x, y, h_mode, v_mode, size, _47_)
   else
     new_y = nil
   end
+  local old_color = love.graphics.getColor()
   love.graphics.setColor(r, g, b, a)
   love.graphics.setFont(font)
   return love.graphics.print(str, new_x, new_y)
 end
 local function show_welcome()
-  local color = COLORS.white
   local line_space = 0.4
-  print_text("Welcome to snake, powered by love2d!", (win_width * 0.5), ((win_height * 0.5) - (SIZES.title * 0.5) - (SIZES.title * line_space * 0.5)), "center", "middle", SIZES.title, color)
-  return print_text("Press [SPACE] to start game", (win_width * 0.5), ((win_height * 0.5) + (SIZES.subtitle * 0.5) + (SIZES.subtitle * line_space * 0.5)), "center", "middle", SIZES.subtitle, color)
+  print_text("Welcome to snake, powered by love2d!", (__fnl_global__WIN_2dWIDTH * 0.5), ((__fnl_global__WIN_2dHEIGHT * 0.5) - (SIZES.title * 0.5) - (SIZES.title * line_space * 0.5)), "center", "middle", SIZES.title, COLORS.red)
+  return print_text("Press [SPACE] to start game", (__fnl_global__WIN_2dWIDTH * 0.5), ((__fnl_global__WIN_2dHEIGHT * 0.5) + (SIZES.subtitle * 0.5) + (SIZES.subtitle * line_space * 0.5)), "center", "middle", SIZES.subtitle, COLORS.red)
 end
 local function show_game_over()
-  return print_text("Game Over!", (win_width * 0.5), (win_height * 0.5), "center", "middle", 18, {0.8, 0.2, 0.2, 1})
+  return print_text("Game Over!", (__fnl_global__WIN_2dWIDTH * 0.5), (__fnl_global__WIN_2dHEIGHT * 0.5), "center", "middle", 18, COLORS.red)
 end
 local function draw_grid()
   love.graphics.setColor(0.4, 0.4, 0.4)
@@ -438,11 +440,20 @@ end
 local function draw_board()
   love.graphics.setColor(0.4, 0.4, 0.4)
   draw_frame((__fnl_global__margin_2dleft + 1 + __fnl_global__play_2dwidth), __fnl_global__margin_2dtop, __fnl_global__board_2dwidth, __fnl_global__board_2dheight)
-  print_text(("Time elipsed: " .. string.format("%.0f", elapsed)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), _24(__fnl_global__margin_2dtop, 1), "left", "top", SIZES.text, COLORS.white)
-  return print_text(("Score: " .. (#snake.body * 10)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), (_24(__fnl_global__margin_2dtop, 1) + (SIZES.text * 1.4)), "left", "top", SIZES.text, COLORS.white)
+  print_text(("Time elipsed: " .. string.format("%.0f", elapsed)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), _24(__fnl_global__margin_2dtop, 1), "left", "top", SIZES.text, COLORS.black)
+  return print_text(("Score: " .. (#snake.body * 10)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), (_24(__fnl_global__margin_2dtop, 1) + (SIZES.text * 1.4)), "left", "top", SIZES.text, COLORS.black)
+end
+local function draw_background()
+  local bg_width = __fnl_global__bg_2dimg:getWidth()
+  local bg_height = __fnl_global__bg_2dimg:getHeight()
+  local scale_x = (__fnl_global__WIN_2dWIDTH / bg_width)
+  local scale_y = (__fnl_global__WIN_2dHEIGHT / bg_height)
+  love.graphics.setColor(COLORS.white)
+  return love.graphics.draw(__fnl_global__bg_2dimg, 0, 0, 0, scale_x, scale_y)
 end
 love.draw = function()
-  print_text(("fps: " .. love.timer.getFPS()), 0, 0, "left", "top", 14, COLORS.white)
+  draw_background()
+  print_text(("fps: " .. love.timer.getFPS()), 0, 0, "left", "top", 14, COLORS.black)
   if (STATE == "Welcome") then
     return show_welcome()
   elseif (STATE == "Playing") then

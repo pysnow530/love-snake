@@ -17,8 +17,8 @@
 (fn sum [...] (accumulate [total 0 _ v (ipairs [...])] (+ total v)))
 (fn $ [...] (* NODE-LENGTH (sum ...)))
 
-(local win-width ($ margin-left play-width 1 board-width 1))
-(local win-height ($ margin-top play-height margin-bottom))
+(global WIN-WIDTH ($ margin-left play-width 1 board-width 1))
+(global WIN-HEIGHT ($ margin-top play-height margin-bottom))
 
 (fn clamp [x min max]
     (if
@@ -42,10 +42,13 @@
 (global eat-sound nil)
 (global gg-sound nil)
 
+;; imgs
+(global bg-img nil)
+
 (global move-count 0)
 
 (global DIRS {:up [0 -1] :right [1 0] :down [0 1] :left [-1 0]})
-(local COLORS {:white [0.8 0.8 0.8 1] :gray [0.5 0.5 0.5 1]})
+(local COLORS {:white [1 1 1 1] :gray [0.5 0.5 0.5 1] :black [0.2 0.2 0.2 1] :red [0.8 0.2 0.2 1]})
 (local SIZES {:title 18 :subtitle 16 :text 14})
 
 (fn lst= [lst1 lst2]
@@ -160,13 +163,16 @@
 (var total-dt 0)
 
 (fn love.load []
-    (love.window.setMode win-width win-height)
+    (love.window.setMode WIN-WIDTH WIN-HEIGHT)
 
     ;; init audio
     (set move-sound (love.audio.newSource "audio/move.wav" :static))
     (set move2-sound (love.audio.newSource "audio/move2.wav" :static))
     (set eat-sound (love.audio.newSource "audio/eat.wav" :static))
-    (set gg-sound (love.audio.newSource "audio/gg.wav" :static)))
+    (set gg-sound (love.audio.newSource "audio/gg.wav" :static))
+
+    ;; imgs
+    (set bg-img (love.graphics.newImage "imgs/bg.jpg")))
 
 (fn love.keypressed [key _ _]
     (let [{: up : right : down : left} DIRS
@@ -216,24 +222,25 @@
                   (= h-mode :center) (- x (half width)))
           new-y (if
                   (= v-mode :top) y
-                  (= v-mode :middle) (- y (half height)))]
+                  (= v-mode :middle) (- y (half height)))
+          old-color (love.graphics.getColor)]
       (love.graphics.setColor r g b a)
       (love.graphics.setFont font)
       (love.graphics.print str new-x new-y)))
 
 (fn show-welcome []
-    (let [color COLORS.white line-space 0.4]
+    (let [line-space 0.4]
       (print-text "Welcome to snake, powered by love2d!"
-                  (half win-width)
-                  (- (half win-height) (half SIZES.title) (* SIZES.title line-space 0.5))
-                  :center :middle SIZES.title color)
+                  (half WIN-WIDTH)
+                  (- (half WIN-HEIGHT) (half SIZES.title) (* SIZES.title line-space 0.5))
+                  :center :middle SIZES.title COLORS.red)
       (print-text "Press [SPACE] to start game"
-                  (half win-width) (+ (half win-height) (half SIZES.subtitle) (* SIZES.subtitle line-space 0.5))
-                  :center :middle SIZES.subtitle color)))
+                  (half WIN-WIDTH) (+ (half WIN-HEIGHT) (half SIZES.subtitle) (* SIZES.subtitle line-space 0.5))
+                  :center :middle SIZES.subtitle COLORS.red)))
 
 (fn show-game-over []
-    (print-text "Game Over!" (half win-width) (half win-height)
-                :center :middle 18 [0.8 0.2 0.2 1.0]))
+    (print-text "Game Over!" (half WIN-WIDTH) (half WIN-HEIGHT)
+                :center :middle 18 COLORS.red))
 
 (fn draw-grid []
     (love.graphics.setColor 0.4 0.4 0.4)
@@ -258,15 +265,25 @@
                 ($ margin-left play-width 1 1)
                 ($ margin-top 1)
                 :left :top
-                SIZES.text COLORS.white)
+                SIZES.text COLORS.black)
     (print-text (.. "Score: " (* (length snake.body) 10))
                 ($ margin-left play-width 1 1)
                 (+ ($ margin-top 1) (* SIZES.text 1.4))
                 :left :top
-                SIZES.text COLORS.white))
+                SIZES.text COLORS.black))
+
+(fn draw-background []
+    "Draw background, by extremely use the bg image."
+    (let [bg-width (bg-img:getWidth)
+          bg-height (bg-img:getHeight)
+          scale-x (/ WIN-WIDTH bg-width)
+          scale-y (/ WIN-HEIGHT bg-height)]
+      (love.graphics.setColor COLORS.white)
+      (love.graphics.draw bg-img 0 0 0 scale-x scale-y)))
 
 (fn love.draw []
-    (print-text (.. "fps: " (love.timer.getFPS)) 0 0 :left :top 14 COLORS.white)
+    (draw-background)
+    (print-text (.. "fps: " (love.timer.getFPS)) 0 0 :left :top 14 COLORS.black)
     (case STATE
       :Welcome (show-welcome)
       :Playing (do
