@@ -44,6 +44,8 @@
 
 ;; imgs
 (global bg-img nil)
+(global playground-img nil)
+(global playground-frame {:left 45 :right 35 :top 45 :bottom 40})
 
 (global move-count 0)
 
@@ -172,7 +174,8 @@
     (set gg-sound (love.audio.newSource "audio/gg.wav" :static))
 
     ;; imgs
-    (set bg-img (love.graphics.newImage "imgs/bg.jpg")))
+    (set bg-img (love.graphics.newImage "imgs/bg.jpg"))
+    (set playground-img (love.graphics.newImage "imgs/playground.png")))
 
 (fn love.keypressed [key _ _]
     (let [{: up : right : down : left} DIRS
@@ -242,9 +245,22 @@
     (print-text "Game Over!" (half WIN-WIDTH) (half WIN-HEIGHT)
                 :center :middle 18 COLORS.red))
 
+(fn draw-playground-frame [margin-left margin-top play-width play-height]
+    "Draw playground image."
+    (let [img-width (playground-img:getWidth)
+          img-height (playground-img:getHeight)
+          scale-x (/ ($ play-width) (- img-width playground-frame.left playground-frame.right))
+          scale-y (/ ($ play-height) (- img-height playground-frame.top playground-frame.bottom))
+          origin-x ($ margin-left)
+          origin-y ($ margin-top)
+          new-x (- origin-x (* playground-frame.left scale-x))
+          new-y (- origin-y (* playground-frame.top scale-x))]
+      (love.graphics.setColor COLORS.white)
+      (love.graphics.draw playground-img new-x new-y 0 scale-x scale-y)))
+
 (fn draw-grid []
     (love.graphics.setColor 0.4 0.4 0.4)
-    (draw-frame margin-left margin-top play-width play-height)
+    (draw-playground-frame margin-left margin-top play-width play-height)
     (for [x 1 (- play-width 1)]
          (for [y 1 (- play-height 1)]
               (love.graphics.points ($ x margin-left) ($ y margin-top)))))
