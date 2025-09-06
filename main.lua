@@ -1,4 +1,4 @@
-__fnl_global__NODE_2dLENGTH = 20
+__fnl_global__NODE_2dLENGTH = 30
 __fnl_global__CORNER_2dLENGTH = (__fnl_global__NODE_2dLENGTH * 0.3)
 __fnl_global__SPEED_2dGAP_2dMAX = 0.5
 __fnl_global__SPEED_2dGAP_2dMIN = 0.25
@@ -150,14 +150,17 @@ Snake["turn-right"] = function(self)
   self["new-dir"] = {( - y), x}
   return nil
 end
-local function draw_box(x, y)
+local function draw_unit(x, y)
   return love.graphics.rectangle("fill", ((x * __fnl_global__NODE_2dLENGTH) + _24(__fnl_global__margin_2dleft)), ((y * __fnl_global__NODE_2dLENGTH) + _24(__fnl_global__margin_2dtop)), __fnl_global__NODE_2dLENGTH, __fnl_global__NODE_2dLENGTH, __fnl_global__CORNER_2dLENGTH, __fnl_global__CORNER_2dLENGTH)
+end
+local function draw_frame(x, y, width, height)
+  return love.graphics.rectangle("line", (_24(x) - 2), (_24(y) - 2), (_24(width) + 4), (_24(height) + 4), __fnl_global__CORNER_2dLENGTH, __fnl_global__CORNER_2dLENGTH)
 end
 Snake.draw = function(self)
   for _, _17_ in ipairs(self.body) do
     local x = _17_[1]
     local y = _17_[2]
-    draw_box(x, y)
+    draw_unit(x, y)
   end
   return nil
 end
@@ -410,7 +413,7 @@ local function show_game_over()
 end
 local function draw_grid()
   love.graphics.setColor(0.4, 0.4, 0.4)
-  love.graphics.rectangle("line", _24(__fnl_global__margin_2dleft), _24(__fnl_global__margin_2dtop), _24(__fnl_global__play_2dwidth), _24(__fnl_global__play_2dheight), __fnl_global__CORNER_2dLENGTH, __fnl_global__CORNER_2dLENGTH)
+  draw_frame(__fnl_global__margin_2dleft, __fnl_global__margin_2dtop, __fnl_global__play_2dwidth, __fnl_global__play_2dheight)
   for x = 1, (__fnl_global__play_2dwidth - 1) do
     for y = 1, (__fnl_global__play_2dheight - 1) do
       love.graphics.points(_24(x, __fnl_global__margin_2dleft), _24(y, __fnl_global__margin_2dtop))
@@ -424,7 +427,7 @@ local function draw_apples()
     local _each_51_ = _50_["pos"]
     local x = _each_51_[1]
     local y = _each_51_[2]
-    draw_box(x, y)
+    draw_unit(x, y)
   end
   return nil
 end
@@ -434,7 +437,7 @@ local function draw_snake()
 end
 local function draw_board()
   love.graphics.setColor(0.4, 0.4, 0.4)
-  love.graphics.rectangle("line", _24(__fnl_global__margin_2dleft, 1, __fnl_global__play_2dwidth), _24(__fnl_global__margin_2dtop), _24(__fnl_global__board_2dwidth), _24(__fnl_global__board_2dheight), __fnl_global__CORNER_2dLENGTH, __fnl_global__CORNER_2dLENGTH)
+  draw_frame((__fnl_global__margin_2dleft + 1 + __fnl_global__play_2dwidth), __fnl_global__margin_2dtop, __fnl_global__board_2dwidth, __fnl_global__board_2dheight)
   print_text(("Time elipsed: " .. string.format("%.0f", elapsed)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), _24(__fnl_global__margin_2dtop, 1), "left", "top", SIZES.text, COLORS.white)
   return print_text(("Score: " .. (#snake.body * 10)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), (_24(__fnl_global__margin_2dtop, 1) + (SIZES.text * 1.4)), "left", "top", SIZES.text, COLORS.white)
 end

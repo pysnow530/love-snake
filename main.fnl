@@ -1,4 +1,4 @@
-(global NODE-LENGTH 20)
+(global NODE-LENGTH 30)
 (global CORNER-LENGTH (* NODE-LENGTH 0.3))
 (global SPEED-GAP-MAX 0.50)
 (global SPEED-GAP-MIN 0.25)
@@ -99,7 +99,8 @@
     (let [[x y] self.dir]
       (set self.new-dir [(- y) x])))
 
-(fn draw-box [x y]
+(fn draw-unit [x y]
+    "Draw box in playground."
     (love.graphics.rectangle
       :fill
       (+ (* x NODE-LENGTH) ($ margin-left))
@@ -109,9 +110,16 @@
       CORNER-LENGTH
       CORNER-LENGTH))
 
+(fn draw-frame [x y width height]
+    "Draw area for playground or board."
+    (love.graphics.rectangle :line
+                             (- ($ x) 2) (- ($ y) 2)
+                             (+ ($ width) 4) (+ ($ height) 4)
+                             CORNER-LENGTH CORNER-LENGTH))
+
 (fn Snake.draw [self]
     (each [_ [x y] (ipairs self.body)]
-          (draw-box x y)))
+          (draw-unit x y)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; /snake ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;; apple ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -229,10 +237,7 @@
 
 (fn draw-grid []
     (love.graphics.setColor 0.4 0.4 0.4)
-    (love.graphics.rectangle :line
-                             ($ margin-left) ($ margin-top)
-                             ($ play-width) ($ play-height)
-                             CORNER-LENGTH CORNER-LENGTH)
+    (draw-frame margin-left margin-top play-width play-height)
     (for [x 1 (- play-width 1)]
          (for [y 1 (- play-height 1)]
               (love.graphics.points ($ x margin-left) ($ y margin-top)))))
@@ -240,7 +245,7 @@
 (fn draw-apples []
     (love.graphics.setColor 0.8 0.2 0.2)
     (each [_ {:pos [x y]} (ipairs apples)]
-          (draw-box x y)))
+          (draw-unit x y)))
 
 (fn draw-snake []
     (love.graphics.setColor 0.2 0.8 0.2)
@@ -248,10 +253,7 @@
 
 (fn draw-board []
     (love.graphics.setColor 0.4 0.4 0.4)
-    (love.graphics.rectangle :line
-                             ($ margin-left 1 play-width) ($ margin-top)
-                             ($ board-width) ($ board-height)
-                             CORNER-LENGTH CORNER-LENGTH)
+    (draw-frame (+ margin-left 1 play-width) margin-top board-width  board-height)
     (print-text (.. "Time elipsed: " (string.format "%.0f" elapsed))
                 ($ margin-left play-width 1 1)
                 ($ margin-top 1)
