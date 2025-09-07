@@ -46,6 +46,8 @@
 (global bg-img nil)
 (global playground-img nil)
 (global playground-frame {:left 45 :right 35 :top 45 :bottom 40})
+(global board-img nil)
+(global board-frame {:left 55 :right 60 :top 30 :bottom 58})
 
 (global move-count 0)
 
@@ -115,13 +117,6 @@
       CORNER-LENGTH
       CORNER-LENGTH))
 
-(fn draw-frame [x y width height]
-    "Draw area for playground or board."
-    (love.graphics.rectangle :line
-                             (- ($ x) 2) (- ($ y) 2)
-                             (+ ($ width) 4) (+ ($ height) 4)
-                             CORNER-LENGTH CORNER-LENGTH))
-
 (fn Snake.draw [self]
     (each [_ [x y] (ipairs self.body)]
           (draw-unit x y)))
@@ -175,7 +170,8 @@
 
     ;; imgs
     (set bg-img (love.graphics.newImage "imgs/bg.jpg"))
-    (set playground-img (love.graphics.newImage "imgs/playground.png")))
+    (set playground-img (love.graphics.newImage "imgs/playground.png"))
+    (set board-img (love.graphics.newImage "imgs/board.png")))
 
 (fn love.keypressed [key _ _]
     (let [{: up : right : down : left} DIRS
@@ -245,22 +241,23 @@
     (print-text "Game Over!" (half WIN-WIDTH) (half WIN-HEIGHT)
                 :center :middle 18 COLORS.red))
 
-(fn draw-playground-frame [margin-left margin-top play-width play-height]
+(fn draw-playground-frame [img frame margin-left margin-top play-width play-height]
     "Draw playground image."
-    (let [img-width (playground-img:getWidth)
-          img-height (playground-img:getHeight)
-          scale-x (/ ($ play-width) (- img-width playground-frame.left playground-frame.right))
-          scale-y (/ ($ play-height) (- img-height playground-frame.top playground-frame.bottom))
+    (let [img-width (img:getWidth)
+          img-height (img:getHeight)
+          scale-x (/ ($ play-width) (- img-width frame.left frame.right))
+          scale-y (/ ($ play-height) (- img-height frame.top frame.bottom))
           origin-x ($ margin-left)
           origin-y ($ margin-top)
-          new-x (- origin-x (* playground-frame.left scale-x))
-          new-y (- origin-y (* playground-frame.top scale-x))]
+          new-x (- origin-x (* frame.left scale-x))
+          new-y (- origin-y (* frame.top scale-x))]
       (love.graphics.setColor COLORS.white)
-      (love.graphics.draw playground-img new-x new-y 0 scale-x scale-y)))
+      (love.graphics.draw img new-x new-y 0 scale-x scale-y)))
 
 (fn draw-grid []
+    (draw-playground-frame playground-img playground-frame
+                           margin-left margin-top play-width play-height)
     (love.graphics.setColor 0.4 0.4 0.4)
-    (draw-playground-frame margin-left margin-top play-width play-height)
     (for [x 1 (- play-width 1)]
          (for [y 1 (- play-height 1)]
               (love.graphics.points ($ x margin-left) ($ y margin-top)))))
@@ -275,8 +272,8 @@
     (snake:draw))
 
 (fn draw-board []
-    (love.graphics.setColor 0.4 0.4 0.4)
-    (draw-frame (+ margin-left 1 play-width) margin-top board-width  board-height)
+    (draw-playground-frame board-img board-frame
+                           (+ margin-left play-width 1) margin-top board-width  board-height)
     (print-text (.. "Time elipsed: " (string.format "%.0f" elapsed))
                 ($ margin-left play-width 1 1)
                 ($ margin-top 1)

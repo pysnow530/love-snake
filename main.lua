@@ -45,6 +45,8 @@ __fnl_global__gg_2dsound = nil
 __fnl_global__bg_2dimg = nil
 __fnl_global__playground_2dimg = nil
 __fnl_global__playground_2dframe = {left = 45, right = 35, top = 45, bottom = 40}
+__fnl_global__board_2dimg = nil
+__fnl_global__board_2dframe = {left = 55, right = 60, top = 30, bottom = 58}
 __fnl_global__move_2dcount = 0
 DIRS = {up = {0, -1}, right = {1, 0}, down = {0, 1}, left = {-1, 0}}
 local COLORS = {white = {1, 1, 1, 1}, gray = {0.5, 0.5, 0.5, 1}, black = {0.2, 0.2, 0.2, 1}, red = {0.8, 0.2, 0.2, 1}}
@@ -155,9 +157,6 @@ Snake["turn-right"] = function(self)
 end
 local function draw_unit(x, y)
   return love.graphics.rectangle("fill", ((x * __fnl_global__NODE_2dLENGTH) + _24(__fnl_global__margin_2dleft)), ((y * __fnl_global__NODE_2dLENGTH) + _24(__fnl_global__margin_2dtop)), __fnl_global__NODE_2dLENGTH, __fnl_global__NODE_2dLENGTH, __fnl_global__CORNER_2dLENGTH, __fnl_global__CORNER_2dLENGTH)
-end
-local function draw_frame(x, y, width, height)
-  return love.graphics.rectangle("line", (_24(x) - 2), (_24(y) - 2), (_24(width) + 4), (_24(height) + 4), __fnl_global__CORNER_2dLENGTH, __fnl_global__CORNER_2dLENGTH)
 end
 Snake.draw = function(self)
   for _, _17_ in ipairs(self.body) do
@@ -271,6 +270,7 @@ love.load = function()
   __fnl_global__gg_2dsound = love.audio.newSource("audio/gg.wav", "static")
   __fnl_global__bg_2dimg = love.graphics.newImage("imgs/bg.jpg")
   __fnl_global__playground_2dimg = love.graphics.newImage("imgs/playground.png")
+  __fnl_global__board_2dimg = love.graphics.newImage("imgs/board.png")
   return nil
 end
 love.keypressed = function(key, _, _0)
@@ -416,21 +416,21 @@ end
 local function show_game_over()
   return print_text("Game Over!", (__fnl_global__WIN_2dWIDTH * 0.5), (__fnl_global__WIN_2dHEIGHT * 0.5), "center", "middle", 18, COLORS.red)
 end
-local function draw_playground_frame(margin_left, margin_top, play_width, play_height)
-  local img_width = __fnl_global__playground_2dimg:getWidth()
-  local img_height = __fnl_global__playground_2dimg:getHeight()
-  local scale_x = (_24(play_width) / (img_width - __fnl_global__playground_2dframe.left - __fnl_global__playground_2dframe.right))
-  local scale_y = (_24(play_height) / (img_height - __fnl_global__playground_2dframe.top - __fnl_global__playground_2dframe.bottom))
+local function draw_playground_frame(img, frame, margin_left, margin_top, play_width, play_height)
+  local img_width = img:getWidth()
+  local img_height = img:getHeight()
+  local scale_x = (_24(play_width) / (img_width - frame.left - frame.right))
+  local scale_y = (_24(play_height) / (img_height - frame.top - frame.bottom))
   local origin_x = _24(margin_left)
   local origin_y = _24(margin_top)
-  local new_x = (origin_x - (__fnl_global__playground_2dframe.left * scale_x))
-  local new_y = (origin_y - (__fnl_global__playground_2dframe.top * scale_x))
+  local new_x = (origin_x - (frame.left * scale_x))
+  local new_y = (origin_y - (frame.top * scale_x))
   love.graphics.setColor(COLORS.white)
-  return love.graphics.draw(__fnl_global__playground_2dimg, new_x, new_y, 0, scale_x, scale_y)
+  return love.graphics.draw(img, new_x, new_y, 0, scale_x, scale_y)
 end
 local function draw_grid()
+  draw_playground_frame(__fnl_global__playground_2dimg, __fnl_global__playground_2dframe, __fnl_global__margin_2dleft, __fnl_global__margin_2dtop, __fnl_global__play_2dwidth, __fnl_global__play_2dheight)
   love.graphics.setColor(0.4, 0.4, 0.4)
-  draw_playground_frame(__fnl_global__margin_2dleft, __fnl_global__margin_2dtop, __fnl_global__play_2dwidth, __fnl_global__play_2dheight)
   for x = 1, (__fnl_global__play_2dwidth - 1) do
     for y = 1, (__fnl_global__play_2dheight - 1) do
       love.graphics.points(_24(x, __fnl_global__margin_2dleft), _24(y, __fnl_global__margin_2dtop))
@@ -453,8 +453,7 @@ local function draw_snake()
   return snake:draw()
 end
 local function draw_board()
-  love.graphics.setColor(0.4, 0.4, 0.4)
-  draw_frame((__fnl_global__margin_2dleft + 1 + __fnl_global__play_2dwidth), __fnl_global__margin_2dtop, __fnl_global__board_2dwidth, __fnl_global__board_2dheight)
+  draw_playground_frame(__fnl_global__board_2dimg, __fnl_global__board_2dframe, (__fnl_global__margin_2dleft + __fnl_global__play_2dwidth + 1), __fnl_global__margin_2dtop, __fnl_global__board_2dwidth, __fnl_global__board_2dheight)
   print_text(("Time elipsed: " .. string.format("%.0f", elapsed)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), _24(__fnl_global__margin_2dtop, 1), "left", "top", SIZES.text, COLORS.black)
   return print_text(("Score: " .. (#snake.body * 10)), _24(__fnl_global__margin_2dleft, __fnl_global__play_2dwidth, 1, 1), (_24(__fnl_global__margin_2dtop, 1) + (SIZES.text * 1.4)), "left", "top", SIZES.text, COLORS.black)
 end
