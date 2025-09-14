@@ -1,7 +1,8 @@
 (global NODE-LENGTH 30)
 (global CORNER-LENGTH (* NODE-LENGTH 0.3))
 (global SPEED-GAP-MAX 0.50)
-(global SPEED-GAP-MIN 0.25)
+(global SPEED-GAP-MID 0.22) ;; bellow this speed, zip audio clip
+(global SPEED-GAP-MIN 0.20)
 (global FULL-SPEED-LENGTH 20) ;; after exceed length, come to the SPEED-GAP-MAX
 
 ;; ui
@@ -96,7 +97,7 @@
           new-y (+ head-y dir-y)]
       (table.insert self.body 1 [new-x new-y])
       (table.remove self.body)
-      (love.audio.play sound)))
+      (when (not= nil sound) (love.audio.play sound))))
 
 (fn Snake.turn-left [self]
     (let [[x y] self.dir]
@@ -197,7 +198,8 @@
         (do
           (set total-dt (- total-dt snake.speed))
           (let [{:body [[head-x head-y]]
-                 :new-dir [new-dir-x new-dir-y]} snake
+                 :new-dir [new-dir-x new-dir-y]
+                 : speed} snake
                 new-x (+ head-x new-dir-x)
                 new-y (+ head-y new-dir-y)
                 next-pos-type (predicate-type [new-x new-y])]
@@ -207,7 +209,7 @@
               :apple (do (inc move-count) (snake:eat eat-sound) (table.remove apples))
               nil (do (inc move-count) (snake:move (if (= 0 (% move-count 4))
                                                      move2-sound
-                                                     move-sound)))))))))
+                                                     (if (> speed SPEED-GAP-MID) move-sound nil))))))))))
 
 (macro half [x] `(* ,x 0.5))
 
